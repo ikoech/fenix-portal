@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups, fetchMembers, fetchTFADeals, createTFADeal } from './api'
+import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups, fetchMembers, fetchTFADeals, createTFADeal, fetchSeekingPosts, createSeekingPost } from './api'
 import './App.css'
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
   const [events, setEvents] = useState([])
   const [members, setMembers] = useState([])
   const [tfaDeals, setTfaDeals] = useState([])
+  const [seekingPosts, setSeekingPosts] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
@@ -17,6 +18,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState(null)
   const [dealForm, setDealForm] = useState({ toMember: '', amount: '' })
+  const [seekingForm, setSeekingForm] = useState({ description: '', category: 'Supplier' })
 
   // Restore session on load
   useEffect(() => {
@@ -60,7 +62,15 @@ function App() {
     }
   }, [activeTab, user])
 
-  // Load user signups
+  // Fetch seeking posts when tab is opened
+  useEffect(() => {
+    if (activeTab === 'seeking' && user) {
+      fetchSeekingPosts()
+        .then(data => setSeekingPosts(data))
+        .catch(err => setError(err.message))
+    }
+  }, [activeTab, user])
+
   const loadUserSignups = async (authHeader, memberId) => {
     try {
       const allSignups = await fetchEventSignups()
@@ -74,7 +84,7 @@ function App() {
       console.error('Failed to load signups:', err)
     }
   }
-  // Handle login
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError(null)
@@ -91,17 +101,18 @@ function App() {
       setError(err.message)
     }
   }
-  // Handle logout
+
   const handleLogout = () => {
     setUser(null)
     setProfile(null)
     setSignups({})
     setSelectedMember(null)
     setTfaDeals([])
+    setSeekingPosts([])
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
-  // Handle event signup
+
   const handleSignup = async (eventId) => {
     setError(null)
     try {
@@ -113,7 +124,6 @@ function App() {
     }
   }
 
-  // Handle TFA deal creation
   const handleCreateDeal = async (e) => {
     e.preventDefault()
     setError(null)
@@ -126,7 +136,20 @@ function App() {
       setError(err.message)
     }
   }
-  // Filter members based on search query
+
+  const handleCreateSeeking = async (e) => {
+    e.preventDefault()
+    setError(null)
+    try {
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      const result = await createSeekingPost(authHeader, seekingForm.description, seekingForm.category)
+      setSeekingPosts(prev => [result, ...prev])
+      setSeekingForm({ description: '', category: 'Supplier' })
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   const filteredMembers = members.filter(m => {
     const q = searchQuery.toLowerCase()
     const name = m.name?.toLowerCase() || ''
@@ -134,7 +157,7 @@ function App() {
     const interests = m.acf?.interests?.toLowerCase() || ''
     return name.includes(q) || company.includes(q) || interests.includes(q)
   })
-  // Render 
+
   if (loading) return <div className="status">Loading...</div>
 
   return (
@@ -196,6 +219,10 @@ function App() {
                 className={`tab ${activeTab === 'tfa' ? 'active' : ''}`}
                 onClick={() => { setActiveTab('tfa'); setSelectedMember(null) }}
               >TFA Deals</button>
+              <button
+                className={`tab ${activeTab === 'seeking' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('seeking'); setSelectedMember(null) }}
+              >Seeking</button>
             </nav>
 
             {activeTab === 'events' && (
@@ -347,6 +374,52 @@ function App() {
                         <p><strong>{deal.acf?.from_member}</strong> → <strong>{deal.acf?.to_member}</strong></p>
                         <p>Amount: {deal.acf?.deal_amount || 'N/A'}</p>
                         <p className="deal-date">{formatACFDate(deal.date.substring(0,10).replace(/-/g,''))}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'seeking' && (
+              <section className="seeking-section">
+                <h2>Seeking & Offering</h2>
+                <form onSubmit={handleCreateSeeking} className="seeking-form">
+                  <label>
+                    What are you looking for?
+                    <textarea
+                      value={seekingForm.description}
+                      onChange={(e) => setSeekingForm({...seekingForm, description: e.target.value})}
+                      rows="3"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Category
+                    <select
+                      value={seekingForm.category}
+                      onChange={(e) => setSeekingForm({...seekingForm, category: e.target.value})}
+                    >
+                      <option value="Supplier">Supplier</option>
+                      <option value="Customer">Customer</option>
+                      <option value="Partner">Partner</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+                  <button type="submit" className="btn btn-seeking">Post Seeking</button>
+                </form>
+
+                <h3>All Seeking Posts</h3>
+                {error && <p className="error-msg">{error}</p>}
+                {seekingPosts.length === 0 ? (
+                  <p>No seeking posts yet.</p>
+                ) : (
+                  <ul className="seeking-list">
+                    {seekingPosts.map(post => (
+                      <li key={post.id} className={`seeking-card category-${post.acf?.category?.toLowerCase()}`}>
+                        <span className="category-badge">{post.acf?.category}</span>
+                        <p>{post.acf?.description}</p>
+                        <p className="deal-date">{formatACFDate(post.date.substring(0,10).replace(/-/g,''))}</p>
                       </li>
                     ))}
                   </ul>
