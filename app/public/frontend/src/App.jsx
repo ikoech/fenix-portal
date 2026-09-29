@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
-import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups } from './api'
+import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups, fetchMembers } from './api'
 import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [events, setEvents] = useState([])
+  const [members, setMembers] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [activeTab, setActiveTab] = useState('events')
   const [signups, setSignups] = useState({})
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedMember, setSelectedMember] = useState(null)
 
   // Restore session on load
   useEffect(() => {
@@ -36,6 +39,15 @@ function App() {
         setLoading(false)
       })
   }, [])
+
+  // Fetch members when tab is opened
+  useEffect(() => {
+    if (activeTab === 'members' && user) {
+      fetchMembers()
+        .then(data => setMembers(data))
+        .catch(err => setError(err.message))
+    }
+  }, [activeTab, user])
 
   const loadUserSignups = async (authHeader, memberId) => {
     try {
@@ -72,6 +84,7 @@ function App() {
     setUser(null)
     setProfile(null)
     setSignups({})
+    setSelectedMember(null)
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
@@ -86,6 +99,14 @@ function App() {
       setError(err.message)
     }
   }
+
+  const filteredMembers = members.filter(m => {
+    const q = searchQuery.toLowerCase()
+    const name = m.name?.toLowerCase() || ''
+    const company = m.acf?.company?.toLowerCase() || ''
+    const interests = m.acf?.interests?.toLowerCase() || ''
+    return name.includes(q) || company.includes(q) || interests.includes(q)
+  })
 
   if (loading) return <div className="status">Loading...</div>
 
@@ -134,15 +155,15 @@ function App() {
             <nav className="tabs">
               <button
                 className={`tab ${activeTab === 'events' ? 'active' : ''}`}
-                onClick={() => setActiveTab('events')}
+                onClick={() => { setActiveTab('events'); setSelectedMember(null) }}
               >Events</button>
               <button
                 className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => setActiveTab('profile')}
+                onClick={() => { setActiveTab('profile'); setSelectedMember(null) }}
               >My Profile</button>
               <button
                 className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-                onClick={() => setActiveTab('members')}
+                onClick={() => { setActiveTab('members'); setSelectedMember(null) }}
               >Members</button>
             </nav>
 
@@ -198,10 +219,63 @@ function App() {
               </section>
             )}
 
-            {activeTab === 'members' && (
+            {activeTab === 'members' && !selectedMember && (
               <section className="members-section">
-                <h2>Members</h2>
-                <p>Coming soon — member list will appear here.</p>
+                <h2>All Members</h2>
+                <input
+                  type="text"
+                  placeholder="Search by name, company or interests..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+                {filteredMembers.length === 0 ? (
+                  <p>No members found.</p>
+                ) : (
+                  <ul className="member-list">
+                    {filteredMembers.map(member => (
+                      <li
+                        key={member.id}
+                        className="member-card"
+                        onClick={() => setSelectedMember(member)}
+                      >
+                        <div className="member-avatar">
+                          {member.acf?.avatar_url ? (
+                            <img src={member.acf.avatar_url} alt={member.name} />
+                          ) : (
+                            <span className="avatar-placeholder">
+                              {member.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="member-info">
+                          <h3>{member.name}</h3>
+                          <p>{member.acf?.company || 'No company set'}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'members' && selectedMember && (
+              <section className="profile-section">
+                <button
+                  onClick={() => setSelectedMember(null)}
+                  className="btn btn-back"
+                >← Back to Members</button>
+                <div className="profile-card">
+                  <h3>{selectedMember.name}</h3>
+                  <table className="profile-table">
+                    <tbody>
+                      <tr><td>Company</td><td>{selectedMember.acf?.company || 'Not set'}</td></tr>
+                      <tr><td>Phone</td><td>{selectedMember.acf?.phone || 'Not set'}</td></tr>
+                      <tr><td>Bio</td><td>{selectedMember.acf?.bio || 'No bio yet.'}</td></tr>
+                      <tr><td>Interests</td><td>{selectedMember.acf?.interests || 'Not set'}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </section>
             )}
           </>

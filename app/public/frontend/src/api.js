@@ -64,3 +64,9 @@ export async function fetchEventSignups() {
   if (!res.ok) throw new Error(`Failed to fetch signups (${res.status})`)
   return res.json()
 }
+
+export async function fetchMembers() {
+  const res = await fetch(`${API_BASE}/users`)
+  if (!res.ok) throw new Error(`Failed to fetch members (${res.status})`)
+  return res.json()
+}
