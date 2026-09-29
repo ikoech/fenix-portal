@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups, fetchMembers } from './api'
+import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups, fetchMembers, fetchTFADeals, createTFADeal } from './api'
 import './App.css'
 
 function App() {
@@ -7,6 +7,7 @@ function App() {
   const [profile, setProfile] = useState(null)
   const [events, setEvents] = useState([])
   const [members, setMembers] = useState([])
+  const [tfaDeals, setTfaDeals] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
@@ -15,6 +16,7 @@ function App() {
   const [signups, setSignups] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState(null)
+  const [dealForm, setDealForm] = useState({ toMember: '', amount: '' })
 
   // Restore session on load
   useEffect(() => {
@@ -49,6 +51,16 @@ function App() {
     }
   }, [activeTab, user])
 
+  // Fetch TFA deals when tab is opened
+  useEffect(() => {
+    if (activeTab === 'tfa' && user) {
+      fetchTFADeals()
+        .then(data => setTfaDeals(data))
+        .catch(err => setError(err.message))
+    }
+  }, [activeTab, user])
+
+  // Load user signups
   const loadUserSignups = async (authHeader, memberId) => {
     try {
       const allSignups = await fetchEventSignups()
@@ -62,7 +74,7 @@ function App() {
       console.error('Failed to load signups:', err)
     }
   }
-
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault()
     setError(null)
@@ -79,16 +91,17 @@ function App() {
       setError(err.message)
     }
   }
-
+  // Handle logout
   const handleLogout = () => {
     setUser(null)
     setProfile(null)
     setSignups({})
     setSelectedMember(null)
+    setTfaDeals([])
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
-
+  // Handle event signup
   const handleSignup = async (eventId) => {
     setError(null)
     try {
@@ -100,6 +113,20 @@ function App() {
     }
   }
 
+  // Handle TFA deal creation
+  const handleCreateDeal = async (e) => {
+    e.preventDefault()
+    setError(null)
+    try {
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      const result = await createTFADeal(authHeader, user.id, parseInt(dealForm.toMember), dealForm.amount)
+      setTfaDeals(prev => [result, ...prev])
+      setDealForm({ toMember: '', amount: '' })
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+  // Filter members based on search query
   const filteredMembers = members.filter(m => {
     const q = searchQuery.toLowerCase()
     const name = m.name?.toLowerCase() || ''
@@ -107,7 +134,7 @@ function App() {
     const interests = m.acf?.interests?.toLowerCase() || ''
     return name.includes(q) || company.includes(q) || interests.includes(q)
   })
-
+  // Render 
   if (loading) return <div className="status">Loading...</div>
 
   return (
@@ -165,6 +192,10 @@ function App() {
                 className={`tab ${activeTab === 'members' ? 'active' : ''}`}
                 onClick={() => { setActiveTab('members'); setSelectedMember(null) }}
               >Members</button>
+              <button
+                className={`tab ${activeTab === 'tfa' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('tfa'); setSelectedMember(null) }}
+              >TFA Deals</button>
             </nav>
 
             {activeTab === 'events' && (
@@ -276,6 +307,50 @@ function App() {
                     </tbody>
                   </table>
                 </div>
+              </section>
+            )}
+
+            {activeTab === 'tfa' && (
+              <section className="tfa-section">
+                <h2>Tack för affären — Business Exchange</h2>
+                <form onSubmit={handleCreateDeal} className="deal-form">
+                  <label>
+                    To Member ID
+                    <input
+                      type="number"
+                      value={dealForm.toMember}
+                      onChange={(e) => setDealForm({...dealForm, toMember: e.target.value})}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Deal Amount
+                    <input
+                      type="text"
+                      placeholder="e.g. 50 000 SEK"
+                      value={dealForm.amount}
+                      onChange={(e) => setDealForm({...dealForm, amount: e.target.value})}
+                      required
+                    />
+                  </label>
+                  <button type="submit" className="btn btn-deal">Record Deal</button>
+                </form>
+
+                <h3>All Deals</h3>
+                {error && <p className="error-msg">{error}</p>}
+                {tfaDeals.length === 0 ? (
+                  <p>No deals recorded yet.</p>
+                ) : (
+                  <ul className="deal-list">
+                    {tfaDeals.map(deal => (
+                      <li key={deal.id} className="deal-card">
+                        <p><strong>{deal.acf?.from_member}</strong> → <strong>{deal.acf?.to_member}</strong></p>
+                        <p>Amount: {deal.acf?.deal_amount || 'N/A'}</p>
+                        <p className="deal-date">{formatACFDate(deal.date.substring(0,10).replace(/-/g,''))}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
             )}
           </>

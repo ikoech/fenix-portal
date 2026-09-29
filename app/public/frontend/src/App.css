@@ -204,3 +204,55 @@
   color: #1d3557;
   margin-bottom: 1rem;
 }
+.tfa-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.deal-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.deal-form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.deal-form input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn-deal {
+  background: #e76f51;
+  color: white;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.deal-list {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.deal-card {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.deal-date {
+  color: #999;
+  font-size: 0.85rem;
+}
