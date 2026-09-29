@@ -61,3 +61,79 @@
   color: #e63946;
   margin-bottom: 1rem;
 }
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.tab {
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #1d3557;
+  background: white;
+  color: #1d3557;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.tab.active {
+  background: #1d3557;
+  color: white;
+}
+
+.profile-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-card h3 {
+  color: #e63946;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.profile-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-table td:first-child {
+  font-weight: 600;
+  color: #1d3557;
+  width: 140px;
+}
+.btn-signup {
+  background: #2a9d8f;
+  color: white;
+  margin-top: 1rem;
+}
+
+.signed-up-badge {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #e9f7ef;
+  color: #2a9d8f;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.members-section {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+}

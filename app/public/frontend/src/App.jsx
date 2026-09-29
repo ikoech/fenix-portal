@@ -1,25 +1,30 @@
 import { useState, useEffect } from 'react'
-import { login, fetchEvents } from './api'
+import { login, fetchEvents, fetchUserProfile, formatACFDate, getAuthHeader, createEventSignup, fetchEventSignups } from './api'
 import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [events, setEvents] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [activeTab, setActiveTab] = useState('events')
+  const [signups, setSignups] = useState({})
 
-  // Check for saved session on load
+  // Restore session on load
   useEffect(() => {
     const savedUser = sessionStorage.getItem('fenix_user')
     const savedAuth = sessionStorage.getItem('fenix_auth')
     if (savedUser && savedAuth) {
       setUser(JSON.parse(savedUser))
+      fetchUserProfile(savedAuth).then(setProfile).catch(() => {})
+      loadUserSignups(savedAuth, JSON.parse(savedUser).id)
     }
   }, [])
 
-  // Fetch events when user changes
+  // Fetch events
   useEffect(() => {
     fetchEvents()
       .then(data => {
@@ -32,14 +37,32 @@ function App() {
       })
   }, [])
 
+  const loadUserSignups = async (authHeader, memberId) => {
+    try {
+      const allSignups = await fetchEventSignups()
+      const userSignups = allSignups.filter(s => s.acf?.member_id === memberId)
+      const signupMap = {}
+      userSignups.forEach(s => {
+        signupMap[s.acf.event_id] = true
+      })
+      setSignups(signupMap)
+    } catch (err) {
+      console.error('Failed to load signups:', err)
+    }
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError(null)
     try {
       const userData = await login(username, password)
+      const authHeader = getAuthHeader(username, password)
       setUser(userData)
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
-      sessionStorage.setItem('fenix_auth', btoa(`${username}:${password}`))
+      sessionStorage.setItem('fenix_auth', authHeader)
+      const prof = await fetchUserProfile(authHeader)
+      setProfile(prof)
+      loadUserSignups(authHeader, userData.id)
     } catch (err) {
       setError(err.message)
     }
@@ -47,8 +70,21 @@ function App() {
 
   const handleLogout = () => {
     setUser(null)
+    setProfile(null)
+    setSignups({})
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
+  }
+
+  const handleSignup = async (eventId) => {
+    setError(null)
+    try {
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      await createEventSignup(authHeader, user.id, eventId)
+      setSignups(prev => ({ ...prev, [eventId]: true }))
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   if (loading) return <div className="status">Loading...</div>
@@ -94,23 +130,81 @@ function App() {
             </form>
           </section>
         ) : (
-          <section>
-            <h2>Upcoming Events</h2>
-            {events.length === 0 ? (
-              <p>No events found.</p>
-            ) : (
-              <ul className="event-list">
-                {events.map(event => (
-                  <li key={event.id} className="event-card">
-                    <h3>{event.title.rendered}</h3>
-                    <p><strong>Date:</strong> {event.acf?.event_date || 'TBD'}</p>
-                    <p><strong>Location:</strong> {event.acf?.location || 'TBD'}</p>
-                    <p><strong>Max Attendees:</strong> {event.acf?.max_attendees || 'N/A'}</p>
-                  </li>
-                ))}
-              </ul>
+          <>
+            <nav className="tabs">
+              <button
+                className={`tab ${activeTab === 'events' ? 'active' : ''}`}
+                onClick={() => setActiveTab('events')}
+              >Events</button>
+              <button
+                className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
+                onClick={() => setActiveTab('profile')}
+              >My Profile</button>
+              <button
+                className={`tab ${activeTab === 'members' ? 'active' : ''}`}
+                onClick={() => setActiveTab('members')}
+              >Members</button>
+            </nav>
+
+            {activeTab === 'events' && (
+              <section>
+                <h2>Upcoming Events</h2>
+                {error && <p className="error-msg">{error}</p>}
+                {events.length === 0 ? (
+                  <p>No events found.</p>
+                ) : (
+                  <ul className="event-list">
+                    {events.map(event => (
+                      <li key={event.id} className="event-card">
+                        <h3>{event.title.rendered}</h3>
+                        <p><strong>Date:</strong> {formatACFDate(event.acf?.event_date)}</p>
+                        <p><strong>Location:</strong> {event.acf?.location || 'TBD'}</p>
+                        <p><strong>Max Attendees:</strong> {event.acf?.max_attendees || 'N/A'}</p>
+                        {signups[event.id] ? (
+                          <span className="signed-up-badge">✓ Signed Up</span>
+                        ) : (
+                          <button
+                            onClick={() => handleSignup(event.id)}
+                            className="btn btn-signup"
+                          >Sign Up</button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
             )}
-          </section>
+
+            {activeTab === 'profile' && (
+              <section className="profile-section">
+                <h2>My Profile</h2>
+                {!profile ? (
+                  <p>Loading profile...</p>
+                ) : (
+                  <div className="profile-card">
+                    <h3>{profile.name}</h3>
+                    <table className="profile-table">
+                      <tbody>
+                        <tr><td>Username</td><td>{profile.username}</td></tr>
+                        <tr><td>Email</td><td>{profile.email || 'Not set'}</td></tr>
+                        <tr><td>Company</td><td>{profile.acf?.company || 'Not set'}</td></tr>
+                        <tr><td>Phone</td><td>{profile.acf?.phone || 'Not set'}</td></tr>
+                        <tr><td>Bio</td><td>{profile.acf?.bio || 'No bio yet.'}</td></tr>
+                        <tr><td>Interests</td><td>{profile.acf?.interests || 'Not set'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'members' && (
+              <section className="members-section">
+                <h2>Members</h2>
+                <p>Coming soon — member list will appear here.</p>
+              </section>
+            )}
+          </>
         )}
       </main>
     </div>
