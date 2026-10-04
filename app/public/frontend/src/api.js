@@ -23,11 +23,33 @@ export async function fetchEvents() {
 }
 export function formatACFDate(dateStr) {
   if (!dateStr) return 'TBD'
-  const y = dateStr.substring(0, 4)
-  const m = dateStr.substring(4, 6)
-  const d = dateStr.substring(6, 8)
+  const date = String(dateStr)
+  const ymd = date.match(/^(\d{4})[-/]?(\d{2})[-/]?(\d{2})$/)
+  const dmy = date.match(/^(\d{2})[-/]?(\d{2})[-/]?(\d{4})$/)
+  const isValidDate = (year, month, day) => {
+    const parsedDate = new Date(Date.UTC(year, month - 1, day))
+    return (
+      parsedDate.getUTCFullYear() === year &&
+      parsedDate.getUTCMonth() === month - 1 &&
+      parsedDate.getUTCDate() === day
+    )
+  }
+  const yearFirst =
+    ymd && isValidDate(Number(ymd[1]), Number(ymd[2]), Number(ymd[3]))
+  const dayFirst =
+    dmy && isValidDate(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]))
+  if (!yearFirst && !dayFirst) return 'TBD'
+
+  const [, y, m, d] = yearFirst
+    ? ymd
+    : [null, dmy[3], dmy[2], dmy[1]]
+
+  const year = Number(y)
+  const month = Number(m)
+  const day = Number(d)
+
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`
+  return `${day} ${months[month - 1]} ${year}`
 }
 
 export async function fetchUserProfile(authHeader) {
@@ -122,5 +144,36 @@ export async function createSeekingPost(authHeader, description, category) {
     })
   })
   if (!res.ok) throw new Error(`Seeking post creation failed (${res.status})`)
+  return res.json()
+}
+//  Document Library
+export async function fetchDocuments() {
+  const res = await fetch(`${API_BASE}/documents`)
+  if (!res.ok) throw new Error(`Failed to fetch documents (${res.status})`)
+  return res.json()
+}
+
+export async function createDocument(authHeader, fileName, fileUrl, uploadDate, userId) {
+  const res = await fetch(`${API_BASE}/documents`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': authHeader
+    },
+    body: JSON.stringify({
+      title: fileName,
+      status: 'publish',
+      acf: {
+        file_url: fileUrl,
+        file_name: fileName,
+        uploaded_by: userId || 1,
+        upload_date: uploadDate
+      }
+    })
+  })
+  if (!res.ok) {
+    const errorText = await res.text()
+    throw new Error(`Document creation failed: ${errorText}`)
+  }
   return res.json()
 }

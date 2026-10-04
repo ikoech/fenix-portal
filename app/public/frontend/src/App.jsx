@@ -6,7 +6,7 @@ import ProfileTab from './components/ProfileTab'
 import MembersTab from './components/MembersTab'
 import TfaTab from './components/TfaTab'
 import SeekingTab from './components/SeekingTab'
-
+import DocumentTab from './components/DocumentsTab'
 import './App.css'
 
 function App() {
@@ -76,6 +76,7 @@ function App() {
               <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
               <button className={`tab ${activeTab === 'tfa' ? 'active' : ''}`} onClick={() => setActiveTab('tfa')}>TFA Deals</button>
               <button className={`tab ${activeTab === 'seeking' ? 'active' : ''}`} onClick={() => setActiveTab('seeking')}>Seeking</button>
+              <button className={`tab ${activeTab === 'Documents' ? 'active' : ''}`} onClick={() => setActiveTab('Documents')}>Document Library</button>
             </nav>
 
             {activeTab === 'events' && <EventsTab user={user} />}
@@ -83,6 +84,7 @@ function App() {
             {activeTab === 'members' && <MembersTab user={user} />}
             {activeTab === 'tfa' && <TfaTab user={user} />}
             {activeTab === 'seeking' && <SeekingTab user={user} />}
+            {activeTab === 'Documents' && <DocumentTab user={user} />}
           </>
         )}
       </main>
