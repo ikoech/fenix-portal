@@ -7,6 +7,8 @@ import MembersTab from './components/MembersTab'
 import TfaTab from './components/TfaTab'
 import SeekingTab from './components/SeekingTab'
 import DocumentTab from './components/DocumentsTab'
+import Header from './components/Header'
+import Footer from './components/Footer'
 import './App.css'
 
 function App() {
@@ -42,6 +44,7 @@ function App() {
       setError(err.message)
     }
   }
+
   // Handle logout
   const handleLogout = () => {
     setUser(null)
@@ -54,16 +57,7 @@ function App() {
 
   return (
     <div className="app">
-      <header>
-        <h1>Affärsnätverket Fenix</h1>
-        <p>Member Portal</p>
-        {user ? (
-          <div className="user-bar">
-            <span>Welcome, <strong>{user.name}</strong></span>
-            <button onClick={handleLogout} className="btn btn-logout">Log out</button>
-          </div>
-        ) : null}
-      </header>
+      <Header user={user} onLogout={handleLogout} />
 
       <main>
         {!user ? (
@@ -84,10 +78,12 @@ function App() {
             {activeTab === 'members' && <MembersTab user={user} />}
             {activeTab === 'tfa' && <TfaTab user={user} />}
             {activeTab === 'seeking' && <SeekingTab user={user} />}
-            {activeTab === 'Documents' && <DocumentTab user={user} />}
+            {activeTab === 'Documents' && <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />}
           </>
         )}
       </main>
+
+      <Footer />
     </div>
   )
 }

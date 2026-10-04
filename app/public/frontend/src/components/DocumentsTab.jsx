@@ -38,10 +38,13 @@ function DocumentTab({ authHeader }) {
 
     const userData = JSON.parse(sessionStorage.getItem('fenix_user') || '{}');
 
+    // Use the real file name from the file input (includes extension)
+    const realFileName = uploadFile?.name || uploadName;
+
     try {
       await createDocument(
         sessionStorage.getItem('fenix_auth'),
-        uploadName,
+        realFileName,
         '#',
         acfUploadDate,
         userData.id

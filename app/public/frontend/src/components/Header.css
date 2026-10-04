@@ -1,0 +1,59 @@
+.site-header {
+  background: #ffffff;
+  border-bottom: 3px solid #2c6b7f;
+  padding: 16px 24px;
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.site-info h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.site-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.user-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.btn-logout {
+  background: #2c3e50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background: #34495e;
+}
