@@ -177,3 +177,13 @@ export async function createDocument(authHeader, fileName, fileUrl, uploadDate, 
   }
   return res.json()
 }
+// --- Admin ---
+
+export async function fetchAllWithCount(endpoint, authHeader) {
+  const res = await fetch(`${API_BASE}/${endpoint}?per_page=100`, {
+    headers: { 'Authorization': authHeader }
+  })
+  if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`)
+  const data = await res.json()
+  return data
+}

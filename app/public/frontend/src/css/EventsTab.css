@@ -1,0 +1,293 @@
+/* --- Events Section --- */
+
+.events-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.events-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.events-header h2 {
+  font-size: 32px;
+  color: #2c3e50;
+  margin: 0 0 4px;
+}
+
+.events-subtitle {
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* --- Events Grid --- */
+
+.events-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- Event Card --- */
+
+.event-card {
+  display: grid;
+  grid-template-columns: 70px 200px 1fr;
+  gap: 20px;
+  align-items: start;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 20px;
+  transition: box-shadow 0.2s;
+}
+
+.event-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Date Badge --- */
+
+.event-date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #2c3e50;
+  color: white;
+  border-radius: 6px;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.event-day {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.event-month {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #e67e22;
+}
+
+/* --- Event Image --- */
+
+.event-image-wrap {
+  width: 200px;
+  height: 130px;
+  overflow: hidden;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.event-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e67e22;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+
+/* --- Event Details --- */
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-title {
+  margin: 0;
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.event-location {
+  margin: 0;
+  font-size: 13px;
+  color: #e67e22;
+  font-weight: 500;
+}
+
+.event-meta {
+  margin: 0;
+  font-size: 13px;
+  color: #777;
+}
+
+.event-full-date {
+  margin: 0;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* --- Sign Up Button --- */
+
+.btn-signup {
+  display: inline-block;
+  margin-top: 8px;
+  background: #e67e22;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  width: fit-content;
+  transition: background 0.2s;
+}
+
+.btn-signup:hover {
+  background: #cf6d17;
+}
+
+.signed-up-badge {
+  display: inline-block;
+  margin-top: 8px;
+  background: #27ae60;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 768px) {
+  .event-card {
+    grid-template-columns: 1fr;
+  }
+
+  .event-date-badge {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .event-image-wrap {
+    width: 100%;
+    height: 180px;
+  }
+}
+/* --- Event Create Form --- */
+
+.btn-create-event {
+  background: #F5A623;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-create-event:hover {
+  background: #cf6d17;
+}
+
+.event-create-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  margin-bottom: 24px;
+}
+
+.event-create-form h3 {
+  margin: 0 0 16px;
+  color: #2C3E50;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #2C3E50;
+  font-size: 13px;
+}
+
+.form-group input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-create {
+  background: #F5A623;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.btn-create:hover {
+  background: #cf6d17;
+}
+
+.form-message {
+  margin-top: 10px;
+  color: #d64545;
+  font-size: 14px;
+}
+
+.event-time {
+  margin: 0;
+  font-size: 13px;
+  color: #e67e22;
+  font-weight: 500;
+}
+.event-description {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.form-group textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+}

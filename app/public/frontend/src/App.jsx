@@ -9,6 +9,7 @@ import SeekingTab from './components/SeekingTab'
 import DocumentTab from './components/DocumentsTab'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import AdminTab from './components/AdminTab'
 import './App.css'
 
 function App() {
@@ -65,6 +66,9 @@ function App() {
         ) : (
           <>
             <nav className="tabs">
+              {user?.id === 1 && (
+              <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
+            )}
               <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
               <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
               <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
@@ -72,7 +76,7 @@ function App() {
               <button className={`tab ${activeTab === 'seeking' ? 'active' : ''}`} onClick={() => setActiveTab('seeking')}>Seeking</button>
               <button className={`tab ${activeTab === 'Documents' ? 'active' : ''}`} onClick={() => setActiveTab('Documents')}>Document Library</button>
             </nav>
-
+            {activeTab === 'admin' && <AdminTab user={user} />}
             {activeTab === 'events' && <EventsTab user={user} />}
             {activeTab === 'profile' && <ProfileTab profile={profile} />}
             {activeTab === 'members' && <MembersTab user={user} />}
