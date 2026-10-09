@@ -1,0 +1,59 @@
+.tfa-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.deal-list {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.deal-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+}
+
+.deal-card p {
+  margin: 0.25rem 0;
+  color: #555;
+}
+
+.deal-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  margin-bottom: 2rem;
+}
+
+.deal-form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #2C3E50;
+}
+
+.deal-form input {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.btn-deal {
+  background: #F5A623;
+  color: white;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.deal-date {
+  color: #999;
+  font-size: 0.85rem;
+}

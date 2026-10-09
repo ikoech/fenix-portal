@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchTFADeals, createTFADeal, formatACFDate } from '../api'
+import '../css/TfaTab.css'
 
 function TfaTab({ user }) {
   const [tfaDeals, setTfaDeals] = useState([])

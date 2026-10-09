@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchSeekingPosts, createSeekingPost, formatACFDate } from '../api'
+import '../css/SeekingTab.css'
 
 function SeekingTab({ user }) {
   const [seekingPosts, setSeekingPosts] = useState([])

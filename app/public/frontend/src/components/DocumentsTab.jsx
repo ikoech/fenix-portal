@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchDocuments, createDocument, formatACFDate } from '../api';
+import '../css/DocumentsTab.css';
 
 function DocumentTab({ authHeader }) {
   const [documents, setDocuments] = useState([]);

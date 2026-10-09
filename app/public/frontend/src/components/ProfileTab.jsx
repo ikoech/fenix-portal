@@ -1,3 +1,5 @@
+import '../css/ProfileTab.css'
+
 function ProfileTab({ profile }) {
   if (!profile) return <p>Loading profile...</p>
 

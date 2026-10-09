@@ -1,0 +1,65 @@
+.members-section {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.member-list {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.member-card {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.member-card:hover {
+  box-shadow: 0 4px 14px rgba(44, 62, 80, 0.15);
+}
+
+.member-avatar img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #4A7C89;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.member-info h3 {
+  color: #2C3E50;
+  margin: 0;
+}
+
+.member-info p {
+  color: #666;
+  margin: 0.25rem 0 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}

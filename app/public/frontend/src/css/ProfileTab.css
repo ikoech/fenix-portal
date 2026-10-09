@@ -1,0 +1,33 @@
+.profile-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+}
+
+.profile-card h3 {
+  color: #4A7C89;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.profile-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-table td:first-child {
+  font-weight: 600;
+  color: #2C3E50;
+  width: 140px;
+}

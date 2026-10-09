@@ -12,39 +12,17 @@ body {
 }
 
 .app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
   max-width: 900px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
-}
-
-/* ===== Header ===== */
-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 3px solid #F5A623;
-}
-
-header h1 {
-  color: #2C3E50;
-  font-size: 2rem;
-  letter-spacing: 0.5px;
-}
-
-header p {
-  color: #4A7C89;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-}
-
-.user-bar {
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
 }
 
 /* ===== Tabs ===== */
@@ -77,7 +55,7 @@ header p {
   color: white;
 }
 
-/* ===== Buttons ===== */
+/* ===== Shared buttons ===== */
 .btn {
   padding: 0.6rem 1.5rem;
   border: none;
@@ -92,277 +70,12 @@ header p {
   opacity: 0.9;
 }
 
-.btn-login {
-  background: #F5A623;
-  color: white;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.btn-logout {
-  background: #2C3E50;
-  color: white;
-}
-
-.btn-signup {
-  background: #4A7C89;
-  color: white;
-  margin-top: 1rem;
-}
-
-.btn-deal {
-  background: #F5A623;
-  color: white;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.btn-seeking {
-  background: #4A7C89;
-  color: white;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
 .btn-back {
   background: transparent;
   border: 1px solid #4A7C89;
   color: #4A7C89;
   margin-bottom: 1rem;
 }
-
-/* ===== Login ===== */
-.login-section {
-  max-width: 400px;
-  margin: 2rem auto;
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
-}
-
-.login-section h2 {
-  margin-bottom: 1.5rem;
-  color: #2C3E50;
-}
-
-.login-section label {
-  display: block;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #2C3E50;
-}
-
-.login-section input {
-  display: block;
-  width: 100%;
-  padding: 0.6rem;
-  margin-top: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-/* ===== Cards (shared) ===== */
-.event-list,
-.member-list,
-.deal-list,
-.seeking-list {
-  list-style: none;
-  display: grid;
-  gap: 1rem;
-}
-
-.event-card,
-.member-card,
-.deal-card,
-.seeking-card,
-.profile-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-}
-
-.event-card h3,
-.profile-card h3,
-.member-info h3 {
-  color: #2C3E50;
-  margin-bottom: 0.5rem;
-}
-
-.event-card p,
-.deal-card p,
-.seeking-card p {
-  margin: 0.25rem 0;
-  color: #555;
-}
-
-/* ===== Signup badge ===== */
-.signed-up-badge {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: #e8f2f4;
-  color: #4A7C89;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-/* ===== Search ===== */
-.search-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-/* ===== Members ===== */
-.members-section {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.member-card {
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-
-.member-card:hover {
-  box-shadow: 0 4px 14px rgba(44, 62, 80, 0.15);
-}
-
-.member-avatar img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #4A7C89;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.member-info h3 {
-  margin: 0;
-}
-
-.member-info p {
-  color: #666;
-  margin: 0.25rem 0 0;
-}
-
-/* ===== Profile ===== */
-.profile-section {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.profile-card h3 {
-  color: #4A7C89;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.profile-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.profile-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-}
-
-.profile-table td:first-child {
-  font-weight: 600;
-  color: #2C3E50;
-  width: 140px;
-}
-
-/* ===== TFA Deals ===== */
-.tfa-section {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.deal-form,
-.seeking-form {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-  margin-bottom: 2rem;
-}
-
-.deal-form label,
-.seeking-form label {
-  display: block;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #2C3E50;
-}
-
-.deal-form input,
-.seeking-form textarea,
-.seeking-form select {
-  display: block;
-  width: 100%;
-  padding: 0.6rem;
-  margin-top: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.deal-date {
-  color: #999;
-  font-size: 0.85rem;
-}
-
-/* ===== Seeking ===== */
-.seeking-section {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.seeking-card {
-  border-left: 4px solid #ccc;
-}
-
-.category-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.category-supplier { border-left-color: #4A7C89; }
-.category-customer { border-left-color: #F5A623; }
-.category-partner { border-left-color: #e76f51; }
-.category-other { border-left-color: #2C3E50; }
-
-.category-supplier .category-badge { background: #e8f2f4; color: #4A7C89; }
-.category-customer .category-badge { background: #fdf3e0; color: #c77f0a; }
-.category-partner .category-badge { background: #fde8e3; color: #e76f51; }
-.category-other .category-badge { background: #eceff1; color: #2C3E50; }
 
 /* ===== Status & Errors ===== */
 .status {

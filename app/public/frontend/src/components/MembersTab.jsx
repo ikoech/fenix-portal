@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchMembers } from '../api'
+import '../css/MembersTab.css'
 
 function MembersTab({ user }) {
   const [members, setMembers] = useState([])

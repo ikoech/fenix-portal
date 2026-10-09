@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchEvents, createEventSignup, formatACFDate } from '../api'
+import '../css/EventsTab.css'
 
 function EventsTab({ user }) {
   const [events, setEvents] = useState([])
