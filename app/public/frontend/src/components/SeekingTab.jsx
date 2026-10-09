@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchSeekingPosts, createSeekingPost, formatACFDate } from '../api'
+import { fetchSeekingPosts, createSeekingPost } from '../api/seeking'
+import { formatACFDate } from '../utils/date'
 import '../css/SeekingTab.css'
 
 function SeekingTab({ user }) {

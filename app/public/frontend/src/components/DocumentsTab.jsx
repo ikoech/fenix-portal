@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { fetchDocuments, createDocument, formatACFDate } from '../api';
+import { fetchDocuments, createDocument } from '../api/documents';
+import { formatACFDate } from '../utils/date'
 import '../css/DocumentsTab.css';
 
 function DocumentTab({ authHeader }) {

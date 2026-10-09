@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { login, fetchUserProfile, getAuthHeader } from './api'
+import { login, fetchUserProfile, getAuthHeader } from './api/auth'
 import Login from './components/Login'
 import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'

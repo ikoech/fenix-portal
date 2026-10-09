@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchEvents, createEventSignup, formatACFDate } from '../api'
+import { fetchEvents, createEventSignup } from '../api/events'
+import { formatACFDate } from '../utils/date'
 import '../css/EventsTab.css'
 
 function EventsTab({ user }) {

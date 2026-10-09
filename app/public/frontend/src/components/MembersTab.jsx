@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchMembers } from '../api'
+import { fetchMembers } from '../api/members'
 import '../css/MembersTab.css'
 
 function MembersTab({ user }) {

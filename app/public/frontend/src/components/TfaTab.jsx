@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchTFADeals, createTFADeal, formatACFDate } from '../api'
+import { fetchTFADeals, createTFADeal } from '../api/tfa'
+import { formatACFDate } from '../utils/date'
 import '../css/TfaTab.css'
 
 function TfaTab({ user }) {
