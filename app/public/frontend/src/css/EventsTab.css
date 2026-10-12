@@ -291,3 +291,33 @@
   font-size: 14px;
   resize: vertical;
 }
+.signed-up-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-cancel-link {
+  background: none;
+  border: none;
+  color: #d64545;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-cancel-link:hover { color: #b33a3a; }
+.btn-cancel-link:disabled { opacity: 0.6; cursor: wait; }
+
+.event-full-badge {
+  display: inline-block;
+  background: #eee;
+  color: #777;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-signup:disabled { opacity: 0.6; cursor: wait; }

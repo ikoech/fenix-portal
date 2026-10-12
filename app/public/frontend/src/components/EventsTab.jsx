@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchEvents, createEventSignup } from '../api/events'
+import { fetchEvents, createEventSignup, deleteEventSignup } from '../api/events'
 import { formatACFDate } from '../utils/date'
 import '../css/EventsTab.css'
 
@@ -7,8 +7,10 @@ function EventsTab({ user }) {
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
   const [events, setEvents] = useState([])
   const [signups, setSignups] = useState({})
+  const [signupCounts, setSignupCounts] = useState({})
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [busy, setBusy] = useState(null)
   const [newTitle, setNewTitle] = useState('')
   const [newDate, setNewDate] = useState('')
   const [newTime, setNewTime] = useState('')
@@ -21,36 +23,89 @@ function EventsTab({ user }) {
   useEffect(() => {
     fetchEvents()
       .then(data => {
-        setEvents(data)
-        loadUserSignups(data)
+        const sorted = [...data].sort((a, b) => {
+          const da = a.acf?.event_date || ''
+          const db = b.acf?.event_date || ''
+          return da.localeCompare(db) // YYYYMMDD strings sort correctly
+        })
+        setEvents(sorted)
+        loadUserSignups()
       })
       .catch(err => setError(err.message))
   }, [user])
-  
-  const loadUserSignups = async () => {
+
+  // Load all signups and filter for the current user, also compute counts per event
+  async function loadUserSignups() {
     try {
-      const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/event-signups')
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/event-signups?per_page=100', {
+        headers: { 'Authorization': authHeader }
+      })
       if (!res.ok) return
       const allSignups = await res.json()
-      const userSignups = allSignups.filter(s => s.acf?.member_id === user.id)
+
+      // Which events has THIS user signed up for?
       const map = {}
-      userSignups.forEach(s => { map[s.acf.event_id] = true })
+      allSignups
+        .filter(s => s.acf?.member_id === user.id)
+        .forEach(s => { map[s.acf.event_id] = true })
       setSignups(map)
+
+      // How many sign-ups does EACH event have? (computed, not stored in WP)
+      const counts = {}
+      allSignups.forEach(s => {
+        const id = s.acf?.event_id
+        if (id) counts[id] = (counts[id] || 0) + 1
+      })
+      setSignupCounts(counts)
     } catch (err) {
       console.error('Failed to load signups:', err)
     }
   }
 
+  // Handle user signing up for an event
   const handleSignup = async (eventId) => {
+    setBusy(eventId)
+    setError(null)
     try {
       const authHeader = sessionStorage.getItem('fenix_auth')
-      await createEventSignup(authHeader, user.id, eventId)
+      await createEventSignup(authHeader, eventId)
       setSignups(prev => ({ ...prev, [eventId]: true }))
+      setSignupCounts(prev => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }))
     } catch (err) {
       setError(err.message)
+    } finally {
+      setBusy(null)
     }
   }
 
+  // Handle user cancelling their signup for an event
+  const handleCancelSignup = async (eventId) => {
+    if (!window.confirm('Would you like to cancel your signup for this event?')) return
+    setBusy(eventId)
+    setError(null)
+    try {
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      // Filter client-side so it works regardless of REST meta-query setup
+      const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/event-signups?per_page=100', {
+        headers: { 'Authorization': authHeader }
+      })
+      const all = await res.json()
+      const matches = all.filter(s => s.acf?.event_id === eventId && s.acf?.member_id === user.id)
+      if (!matches.length) throw new Error('No signup found to cancel')
+
+      await deleteEventSignup(authHeader, matches[0].id)
+
+      setSignups(prev => { const copy = { ...prev }; delete copy[eventId]; return copy })
+      setSignupCounts(prev => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  // Handle admin creating a new event
   const handleCreateEvent = async (e) => {
     e.preventDefault()
     setFormMessage('')
@@ -91,15 +146,18 @@ function EventsTab({ user }) {
       setNewImageUrl('')
       setNewDescription('')
       setShowForm(false)
-      // Reload events
+      // Reload events (sorted)
       const updated = await fetchEvents()
-      setEvents(updated)
+      setEvents([...updated].sort((a, b) =>
+        (a.acf?.event_date || '').localeCompare(b.acf?.event_date || '')
+      ))
       loadUserSignups()
     } catch (err) {
       setFormMessage('Creation failed: ' + err.message)
     }
   }
 
+  // Helper to parse date string into parts for display
   function getDateParts(dateStr) {
     if (!dateStr) return { day: '?', month: 'TBD', year: '' }
     let y, m, d
@@ -182,6 +240,9 @@ function EventsTab({ user }) {
           {events.map(event => {
             const dateParts = getDateParts(event.acf?.event_date)
             const isSignedUp = signups[event.id]
+            const currentCount = signupCounts[event.id] || 0
+            const maxNum = parseInt(event.acf?.max_attendees, 10)
+            const isFull = !isNaN(maxNum) && currentCount >= maxNum
             const location = event.acf?.location || 'TBD'
             const maxAttendees = event.acf?.max_attendees || 'N/A'
             const eventTime = event.acf?.event_time || ''
@@ -207,18 +268,35 @@ function EventsTab({ user }) {
                 <div className="event-details">
                   <h3 className="event-title">{event.title.rendered}</h3>
                   {event.acf?.description && (
-                  <p className="event-description">{event.acf.description}</p>
-                )}
+                    <p className="event-description">{event.acf.description}</p>
+                  )}
                   {eventTime && <p className="event-time">🕐 {eventTime}</p>}
                   <p className="event-location">📍 {location}</p>
-                  <p className="event-meta">Max Attendees: {maxAttendees}</p>
+                  <p className="event-meta">
+                    Max Attendees: {maxAttendees} ({currentCount} signed up)
+                  </p>
                   <p className="event-full-date">{formatACFDate(event.acf?.event_date)}</p>
 
                   {isSignedUp ? (
-                    <span className="signed-up-badge">✓ Signed Up</span>
+                    <div className="signed-up-row">
+                      <span className="signed-up-badge">✓ Signed Up</span>
+                      <button
+                        className="btn-cancel-link"
+                        disabled={busy === event.id}
+                        onClick={() => handleCancelSignup(event.id)}
+                      >
+                        {busy === event.id ? 'Cancelling…' : 'Cancel'}
+                      </button>
+                    </div>
+                  ) : isFull ? (
+                    <span className="event-full-badge">Event Full</span>
                   ) : (
-                    <button onClick={() => handleSignup(event.id)} className="btn-signup">
-                      Sign Up →
+                    <button
+                      className="btn-signup"
+                      disabled={busy === event.id}
+                      onClick={() => handleSignup(event.id)}
+                    >
+                      {busy === event.id ? 'Signing up…' : 'Sign Up →'}
                     </button>
                   )}
                 </div>
