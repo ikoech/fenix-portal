@@ -1,7 +1,10 @@
 const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
 
-export async function fetchMembers() {
-  const res = await fetch(`${API_BASE}/users`)
+export async function fetchMembers(authHeader) {
+  const res = await fetch(`${API_BASE}/users`, {
+    cache: 'no-store',
+    headers: { 'Authorization': authHeader }
+  })
   if (!res.ok) throw new Error(`Failed to fetch members (${res.status})`)
   return res.json()
 }

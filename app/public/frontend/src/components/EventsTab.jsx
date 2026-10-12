@@ -4,6 +4,7 @@ import { formatACFDate } from '../utils/date'
 import '../css/EventsTab.css'
 
 function EventsTab({ user }) {
+  const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
   const [events, setEvents] = useState([])
   const [signups, setSignups] = useState({})
   const [error, setError] = useState(null)
@@ -25,7 +26,7 @@ function EventsTab({ user }) {
       })
       .catch(err => setError(err.message))
   }, [user])
-
+  
   const loadUserSignups = async () => {
     try {
       const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/event-signups')
@@ -118,12 +119,14 @@ function EventsTab({ user }) {
     <section className="events-section">
       <div className="events-header">
         <h2>Upcoming Events</h2>
-        <button onClick={() => setShowForm(!showForm)} className="btn-create-event">
-          {showForm ? 'Cancel' : '+ Create Event'}
-        </button>
+        {isAdmin && (
+          <button onClick={() => setShowForm(!showForm)} className="btn-create-event">
+            {showForm ? 'Cancel' : '+ Create Event'}
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {isAdmin && showForm && (
         <form onSubmit={handleCreateEvent} className="event-create-form">
           <h3>Create a New Event</h3>
           <div className="form-row">

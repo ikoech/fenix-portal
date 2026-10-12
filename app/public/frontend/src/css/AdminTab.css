@@ -106,3 +106,103 @@
 .admin-denied h2 {
   color: #d64545;
 }
+/* --- Edit Forms --- */
+
+.admin-edit-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  margin-top: 24px;
+}
+
+.admin-edit-form h3 {
+  margin: 0 0 16px;
+  color: #2C3E50;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #2C3E50;
+  font-size: 13px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-admin-save {
+  background: #F5A623;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.btn-admin-save:hover {
+  background: #cf6d17;
+}
+
+.btn-admin-cancel {
+  background: #999;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-admin-cancel:hover {
+  background: #777;
+}
+
+.btn-admin-edit {
+  background: #4A7C89;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.btn-admin-edit:hover {
+  background: #34495e;
+}
+
+.btn-admin-delete {
+  background: #d64545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-admin-delete:hover {
+  background: #b33a3a;
+}
+.form-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

@@ -9,7 +9,7 @@ function MembersTab({ user }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetchMembers()
+    fetchMembers(sessionStorage.getItem('fenix_auth'))
       .then(data => setMembers(data))
       .catch(err => setError(err.message))
   }, [])
