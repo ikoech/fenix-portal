@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { login, fetchUserProfile, getAuthHeader } from './api/auth'
+import { login, getAuthHeader } from './api/auth'
 import Login from './components/Login'
 import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'
@@ -14,7 +14,6 @@ import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('events')
@@ -25,7 +24,6 @@ function App() {
     const savedAuth = sessionStorage.getItem('fenix_auth')
     if (savedUser && savedAuth) {
       setUser(JSON.parse(savedUser))
-      fetchUserProfile(savedAuth).then(setProfile).catch(() => {})
     }
     setLoading(false)
   }, [])
@@ -39,8 +37,6 @@ function App() {
       setUser(userData)
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
       sessionStorage.setItem('fenix_auth', authHeader)
-      const prof = await fetchUserProfile(authHeader)
-      setProfile(prof)
     } catch (err) {
       setError(err.message)
     }
@@ -49,7 +45,6 @@ function App() {
   // Handle logout
   const handleLogout = () => {
     setUser(null)
-    setProfile(null)
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
@@ -78,8 +73,8 @@ function App() {
             </nav>
             {activeTab === 'admin' && <AdminTab user={user} />}
             {activeTab === 'events' && <EventsTab user={user} />}
-            {activeTab === 'profile' && <ProfileTab profile={profile} />}
-            {activeTab === 'members' && <MembersTab user={user} />}
+            {activeTab === 'profile' && <ProfileTab user={user} />}
+            {activeTab === 'members' && <MembersTab />}
             {activeTab === 'tfa' && <TfaTab user={user} />}
             {activeTab === 'seeking' && <SeekingTab user={user} />}
             {activeTab === 'Documents' && <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />}

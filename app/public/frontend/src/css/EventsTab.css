@@ -23,6 +23,32 @@
   margin: 0;
 }
 
+.events-search {
+  max-width: 500px;
+  margin: 0 auto 32px;
+}
+
+.events-search input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.events-search input:focus {
+  border-color: #2c3e50;
+  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+.events-empty {
+  text-align: center;
+  color: #777;
+}
+
 /* --- Events Grid --- */
 
 .events-grid {

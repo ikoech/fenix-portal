@@ -6,6 +6,7 @@ import '../css/EventsTab.css'
 function EventsTab({ user }) {
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
   const [events, setEvents] = useState([])
+  const [search, setSearch] = useState('')
   const [signups, setSignups] = useState({})
   const [signupCounts, setSignupCounts] = useState({})
   const [error, setError] = useState(null)
@@ -19,6 +20,19 @@ function EventsTab({ user }) {
   const [newImageUrl, setNewImageUrl] = useState('')
   const [formMessage, setFormMessage] = useState('')
   const [newDescription, setNewDescription] = useState('')
+
+  const query = search.trim().toLowerCase()
+  const filteredEvents = events.filter(event => {
+    if (!query) return true
+
+    return [
+      event.title?.rendered,
+      event.acf?.description,
+      event.acf?.location,
+      event.acf?.event_date,
+      event.acf?.event_time
+    ].some(value => String(value || '').toLowerCase().includes(query))
+  })
 
   useEffect(() => {
     fetchEvents()
@@ -184,6 +198,16 @@ function EventsTab({ user }) {
         )}
       </div>
 
+      <div className="events-search">
+        <input
+          type="search"
+          aria-label="Search events"
+          placeholder="Search events by title, description, location, or date..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+
       {isAdmin && showForm && (
         <form onSubmit={handleCreateEvent} className="event-create-form">
           <h3>Create a New Event</h3>
@@ -235,9 +259,11 @@ function EventsTab({ user }) {
 
       {events.length === 0 ? (
         <p>No events found.</p>
+      ) : filteredEvents.length === 0 ? (
+        <p className="events-empty">No events match your search.</p>
       ) : (
         <div className="events-grid">
-          {events.map(event => {
+          {filteredEvents.map(event => {
             const dateParts = getDateParts(event.acf?.event_date)
             const isSignedUp = signups[event.id]
             const currentCount = signupCounts[event.id] || 0
