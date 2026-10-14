@@ -206,3 +206,21 @@
   gap: 8px;
   margin-top: 8px;
 }
+
+.add-member-status {
+  margin-top: 12px;
+}
+
+.add-member-status.error {
+  color: #d64545;
+}
+
+.add-member-status.success {
+  color: #27834a;
+}
+
+.btn-admin-save:disabled,
+.btn-admin-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
