@@ -1,21 +1,19 @@
 import '../css/Header.css'
+import logo from '../assets/logo.png'
+
 
 function Header({ user, onLogout }) {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <div className="logo-area">
-          <img
-            src="/logo.png"
-            alt="Affärsnätverket Fenix logo"
-            className="site-logo"
-          />
-          <div className="site-info">
-            <h1>Affärsnätverket Fenix</h1>
-            <p>Member Portal</p>
-          </div>
-        </div>
 
+<a href="/" className="header-logo-link">
+  <img
+    src="https://natverketfenix.se/wp-content/uploads/2026/04/ny_logga_streck.png"
+    alt="Affärsnätverket Fenix"
+    className="header-logo"
+  />
+</a>
         {user && (
           <div className="user-bar">
             <span>Welcome, <strong>{user.name}</strong></span>
