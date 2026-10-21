@@ -1,20 +1,3 @@
-# WordPress core — not our code
-app/public/wp-admin/
-app/public/wp-includes/
-app/public/*.php
-app/public/wp-content/plugins/
-app/public/wp-content/themes/twenty*
-app/public/wp-content/uploads/
-app/public/wp-content/upgrade/
-app/public/wp-content/cache/
-app/public/wp-content/languages/
-app/envrc
-app/public/.htaccess
-app/public/license.txt
-app/public/readme.html
-app/public/wp-content/index.php
-app/public/wp-content/themes/
-
 # LocalWP internals
 conf/
 logs/
@@ -22,7 +5,6 @@ logs/
 *.db
 
 # Secrets & local config
-app/public/wp-config.php
 .env
 
 # Frontend build artifacts
@@ -32,3 +14,5 @@ frontend/dist/
 # OS junk
 Thumbs.db
 .DS_Store
+
+**/CoPilotSnapshots/
