@@ -57,7 +57,7 @@ export async function updateMember(authHeader, userId, data) {
 export async function deleteMember(authHeader, userId) {
   if (!authHeader) throw new Error('Not logged in — please log in.')
 
-  const res = await fetch(`http://fenix-portal.local/wp-json/wp/v2/users/${userId}`, {
+  const res = await fetch(`http://fenix-portal.local/wp-json/wp/v2/users/${userId}?force=true&reassign=false`, {
     method: 'DELETE',
     headers: { Authorization: authHeader }
   })

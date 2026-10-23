@@ -87,7 +87,7 @@ function AdminTab({ user }) {
   }
   // Handle delete actions
   const handleDeleteMember = (userId) => {
-    if (window.confirm('Are you sure you want to delete this member?')) {
+    if (window.confirm('Are you sure you want to delete this member? Their authored content will also be deleted.')) {
       deleteMember(sessionStorage.getItem('fenix_auth'), userId)
         .then(() => {
           setMembers(members.filter(m => m.id !== userId))
