@@ -20,12 +20,35 @@ function App() {
 
   // Restore session on load
   useEffect(() => {
-    const savedUser = sessionStorage.getItem('fenix_user')
     const savedAuth = sessionStorage.getItem('fenix_auth')
-    if (savedUser && savedAuth) {
-      setUser(JSON.parse(savedUser))
+    let cancelled = false
+
+    async function restoreSession() {
+      if (!savedAuth) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const userData = await fetchUserProfile(savedAuth)
+        if (cancelled) return
+        setUser(userData)
+        sessionStorage.setItem('fenix_user', JSON.stringify(userData))
+      } catch (err) {
+        if (cancelled) return
+        sessionStorage.removeItem('fenix_user')
+        sessionStorage.removeItem('fenix_auth')
+        setError(`Your session could not be restored. Please sign in again. ${err.message}`)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-    setLoading(false)
+
+    restoreSession()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Handle login
@@ -50,6 +73,8 @@ function App() {
 
   if (loading) return <div className="status">Loading...</div>
 
+  const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
+
   return (
     <div className="app">
       <Header user={user} onLogout={handleLogout} />
@@ -60,7 +85,7 @@ function App() {
         ) : (
           <>
             <nav className="tabs">
-              {user?.id === 1 && (
+              {isAdmin && (
               <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
             )}
               <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>

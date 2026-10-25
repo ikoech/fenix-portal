@@ -35,7 +35,7 @@ export async function login(identifier, password) {
 }
 
 export async function fetchUserProfile(authHeader) {
-  const res = await fetch(`${API_BASE}/users/me`, {
+  const res = await fetch(`${API_BASE}/users/me?context=edit`, {
     headers: { 'Authorization': authHeader }
   })
   const user = await readResponse(res, 'Failed to fetch profile')
