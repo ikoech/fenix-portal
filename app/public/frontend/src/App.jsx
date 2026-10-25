@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { login, getAuthHeader } from './api/auth'
+import { login } from './api/auth'
 import Login from './components/Login'
 import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'
@@ -32,8 +32,7 @@ function App() {
   const handleLogin = async (username, password) => {
     setError(null)
     try {
-      const userData = await login(username, password)
-      const authHeader = getAuthHeader(username, password)
+      const { user: userData, authHeader } = await login(username, password)
       setUser(userData)
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
       sessionStorage.setItem('fenix_auth', authHeader)

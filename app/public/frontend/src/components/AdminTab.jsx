@@ -15,6 +15,7 @@ function AdminTab({ user }) {
   const [showAddMember, setShowAddMember] = useState(false)
   const [newMember, setNewMember] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     company: '',
@@ -146,12 +147,20 @@ function AdminTab({ user }) {
       setAddStatus(message)
       setAddStatusType('error')
     }
-    // Trim inputs and generate username
+    // Validate input fields
     const name = newMember.name.trim()
+    const username = newMember.username.trim()
     const email = newMember.email.trim()
-    const username = email.toLowerCase().replace(/[^a-z0-9_.-]/g, '-').slice(0, 60)
     if (!name) {
       reportValidationError('Name is required.')
+      return
+    }
+    if (!username) {
+      reportValidationError('Username is required.')
+      return
+    }
+    if (username.length > 60 || !/^[a-zA-Z0-9_.-]+$/.test(username)) {
+      reportValidationError('Username must be 1-60 characters and contain only letters, numbers, dots, underscores, or hyphens.')
       return
     }
     if (!email) {
@@ -230,6 +239,7 @@ function AdminTab({ user }) {
         setShowAddMember(false)
         setNewMember({
           name: '',
+          username: '',
           email: '',
           password: '',
           company: '',
@@ -248,6 +258,7 @@ function AdminTab({ user }) {
       setShowAddMember(false)
       setNewMember({
         name: '',
+        username: '',
         email: '',
         password: '',
         company: '',
@@ -366,6 +377,10 @@ function AdminTab({ user }) {
               <div className="form-group">
                 <label htmlFor="new-member-name">Name *</label>
                 <input id="new-member-name" type="text" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="new-member-username">Username *</label>
+                <input id="new-member-username" type="text" autoComplete="username" maxLength={60} pattern="[A-Za-z0-9_.-]+" value={newMember.username} onChange={e => setNewMember({ ...newMember, username: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label htmlFor="new-member-email">Email *</label>

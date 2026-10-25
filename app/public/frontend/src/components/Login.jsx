@@ -17,7 +17,7 @@ function Login({ onLogin, error }) {
       {error && <p className="error-msg">{error}</p>}
       <form onSubmit={handleSubmit}>
         <label>
-          Username
+          Username or email
           <input
             type="text"
             value={username}
@@ -26,7 +26,7 @@ function Login({ onLogin, error }) {
           />
         </label>
         <label>
-          Application Password
+          Password
           <input
             type="password"
             value={password}

@@ -11,6 +11,9 @@ logs/
 frontend/node_modules/
 frontend/dist/
 
+# Locally installed WordPress plugins
+app/public/wp-content/plugins/jwt-authentication-for-wp-rest-api/
+
 # OS junk
 Thumbs.db
 .DS_Store

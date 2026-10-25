@@ -83,7 +83,7 @@ $table_prefix = 'wp_';
 /* Add any custom values between this line and the "stop editing" line. */
 
 
-
+define('JWT_AUTH_SECRET_KEY', 'OmHM uF9H NLaP aVzt Od2u Cwoc');
 /**
  * For developers: WordPress debugging mode.
  *
