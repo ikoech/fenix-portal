@@ -50,6 +50,12 @@
   font-size: 14px;
 }
 
+.header-inner > .tabs {
+  flex-basis: 100%;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
 .btn-logout {
   background: #2c3e50;
   color: white;

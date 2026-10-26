@@ -63,6 +63,8 @@ function App() {
       setUser(userData)
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
       sessionStorage.setItem('fenix_auth', authHeader)
+      setShowLogin(false)
+      setView('portal')
     } catch (err) {
       setError(err.message)
     }
@@ -108,27 +110,21 @@ function App() {
    
   return (
     <div className="app">
-      <Header user={user} onLogout={handleLogout} />
+      <Header
+        user={user}
+        onLogout={handleLogout}
+        showTabs={!!user}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setView={setView}
+        isAdmin={isAdmin}
+      />
 
       <main>
         {!user ? (
           <Login onLogin={handleLogin} error={error} />
         ) : (
           <>
-            <nav className="tabs">
-              <button className="tab" onClick={() => setView('start')}>Start</button>
-              {isAdmin && (
-                <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
-              )}
-
-              <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
-              <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
-              <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
-              <button className={`tab ${activeTab === 'tfa' ? 'active' : ''}`} onClick={() => setActiveTab('tfa')}>TFA Deals</button>
-              <button className={`tab ${activeTab === 'seeking' ? 'active' : ''}`} onClick={() => setActiveTab('seeking')}>Seeking</button>
-              <button className={`tab ${activeTab === 'Documents' ? 'active' : ''}`} onClick={() => setActiveTab('Documents')}>Document Library</button>
-            </nav>
-            
             {activeTab === 'admin' && <AdminTab user={user} />}
             {activeTab === 'events' && <EventsTab user={user} />}
             {activeTab === 'profile' && <ProfileTab user={user} />}
