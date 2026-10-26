@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { login } from './api/auth'
+import StartPage from './components/StartPage'      // ← new
 import Login from './components/Login'
 import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'
@@ -10,6 +11,7 @@ import DocumentTab from './components/DocumentsTab'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
+import { fetchUserProfile } from './api/auth'
 import './App.css'
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('events')
+  const [view, setView] = useState('start')    
+  const [showLogin, setShowLogin] = useState(false)
 
   // Restore session on load
   useEffect(() => {
@@ -75,6 +79,33 @@ function App() {
 
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
 
+  // ── Public start page ─────────────────────────────
+    if (view === 'start') {
+      return (
+      <>
+        <Header user={user} onLogout={handleLogout} />
+        <StartPage
+          loggedIn={!!user}
+          onJoin={() => {
+            if (user) { setView('portal'); setActiveTab('members'); }
+            else setShowLogin(true);
+          }}
+          onEnterPortal={() => setView('portal')}
+        />
+        {showLogin && (
+          <div className="modal-backdrop" onClick={() => setShowLogin(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowLogin(false)} aria-label="Stäng">×</button>
+              <Login onLogin={handleLogin} error={error} />
+            </div>
+          </div>
+        )}
+        <Footer />
+      </>
+      )
+    }
+
+   
   return (
     <div className="app">
       <Header user={user} onLogout={handleLogout} />
@@ -85,9 +116,11 @@ function App() {
         ) : (
           <>
             <nav className="tabs">
+              <button className="tab" onClick={() => setView('start')}>Start</button>
               {isAdmin && (
-              <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
-            )}
+                <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
+              )}
+
               <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
               <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
               <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
@@ -95,6 +128,7 @@ function App() {
               <button className={`tab ${activeTab === 'seeking' ? 'active' : ''}`} onClick={() => setActiveTab('seeking')}>Seeking</button>
               <button className={`tab ${activeTab === 'Documents' ? 'active' : ''}`} onClick={() => setActiveTab('Documents')}>Document Library</button>
             </nav>
+            
             {activeTab === 'admin' && <AdminTab user={user} />}
             {activeTab === 'events' && <EventsTab user={user} />}
             {activeTab === 'profile' && <ProfileTab user={user} />}

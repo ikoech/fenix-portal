@@ -88,3 +88,17 @@ main {
   color: #d64545;
   margin-bottom: 1rem;
 }
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: #fff; border-radius: 8px; padding: 32px;
+  width: min(420px, 90vw); position: relative;
+}
+.modal-close {
+  position: absolute; top: 8px; right: 12px;
+  border: none; background: none; font-size: 1.5rem; cursor: pointer;
+}
