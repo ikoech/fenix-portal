@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import '../css/Header.css'
 
 function Header({
@@ -10,10 +11,44 @@ function Header({
   showPublicTabs = false,
   onRequestLogin,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+  const menuButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const handlePointerDown = event => {
+      if (!menuRef.current?.contains(event.target)) {
+        setMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = event => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [menuOpen])
+
+  const selectTab = tab => {
+    setActiveTab(tab)
+    setMenuOpen(false)
+    menuButtonRef.current?.focus()
+  }
+
   return (
     <header className="site-header">
       <div className="header-inner">
-
         <a href="/" className="header-logo-link">
           <img
             src="https://natverketfenix.se/wp-content/uploads/2026/04/ny_logga_streck.png"
@@ -21,12 +56,14 @@ function Header({
             className="header-logo"
           />
         </a>
+
         {user && (
           <div className="user-bar">
             <span>Welcome, <strong>{user.name}</strong></span>
             <button onClick={onLogout} className="btn-logout">Log out</button>
           </div>
         )}
+
         {((user && showTabs) || (!user && showPublicTabs)) && (
           <nav className="tabs">
             <a className="tab" href="https://natverketfenix.se/">Start</a>
@@ -38,9 +75,48 @@ function Header({
                   <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
                 )}
                 <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
-                <button className={`tab ${activeTab === 'tfa' ? 'active' : ''}`} onClick={() => setActiveTab('tfa')}>TFA Deals</button>
-                <button className={`tab ${activeTab === 'seeking' ? 'active' : ''}`} onClick={() => setActiveTab('seeking')}>Seeking</button>
-                <button className={`tab ${activeTab === 'Documents' ? 'active' : ''}`} onClick={() => setActiveTab('Documents')}>Document Library</button>
+                <div className="header-menu" ref={menuRef}>
+                  <button
+                    ref={menuButtonRef}
+                    className={`tab header-menu-toggle${['tfa', 'seeking', 'Documents'].includes(activeTab) ? ' active' : ''}`}
+                    type="button"
+                    aria-label={menuOpen ? 'Close additional navigation options' : 'Open additional navigation options'}
+                    aria-expanded={menuOpen}
+                    aria-controls="header-more-menu"
+                    onClick={() => setMenuOpen(open => !open)}
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                      <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <div
+                    className="header-menu-panel"
+                    id="header-more-menu"
+                    hidden={!menuOpen}
+                  >
+                    <button
+                      className={`tab ${activeTab === 'tfa' ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => selectTab('tfa')}
+                    >
+                      TFA Deals
+                    </button>
+                    <button
+                      className={`tab ${activeTab === 'seeking' ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => selectTab('seeking')}
+                    >
+                      Seeking
+                    </button>
+                    <button
+                      className={`tab ${activeTab === 'Documents' ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => selectTab('Documents')}
+                    >
+                      Document Library
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <button className="tab" onClick={onRequestLogin}>Log in</button>

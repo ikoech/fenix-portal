@@ -1,5 +1,4 @@
 .site-header {
-  background: #ffffff;
   border-bottom: 3px solid #2c6b7f;
   padding: 16px 24px;
 }
@@ -8,10 +7,14 @@
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  /* wrap only kicks in at very narrow widths */
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+.header-logo-link {
+  flex: 0 0 auto;
 }
 
 .header-logo {
@@ -45,16 +48,89 @@
 }
 
 .user-bar {
+  order: 3;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   font-size: 14px;
+  margin-left: auto;
 }
 
 .header-inner > .tabs {
-  flex-basis: 100%;
+  order: 2;
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-start;
+  /* comfortable gap between logo and nav — responsive */
+  margin-inline-start: clamp(24px, 3vw, 40px);
+}
+
+.header-menu {
+  position: relative;
+}
+
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 0;
+  width: 44px;
+  height: 42px;
+  padding: 8px;
+}
+
+.header-menu-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.header-menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 190px;
+  padding: 10px;
+  border: 1px solid #d5e0e3;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+
+.header-menu-panel[hidden] {
+  display: none;
+}
+
+.header-menu-panel .tab {
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .header-inner > .tabs {
+    flex: 1 1 100%;
+    justify-content: center;
+    margin-inline-start: 0;
+  }
+
+  .user-bar {
+    order: 2;
+  }
+
+  .header-inner > .tabs {
+    order: 3;
+  }
+
+  .header-menu-panel {
+    right: 0;
+  }
 }
 
 .btn-logout {

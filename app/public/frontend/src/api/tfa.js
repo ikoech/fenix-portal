@@ -1,11 +1,13 @@
 const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
-
-export async function fetchTFADeals() {
-  const res = await fetch(`${API_BASE}/tfa`)
+// Fetch TFA deals from the API
+export async function fetchTFADeals(authHeader) {
+  const res = await fetch(`${API_BASE}/tfa?per_page=100&_embed`, {
+    headers: authHeader ? { Authorization: authHeader } : {}
+  })
   if (!res.ok) throw new Error(`Failed to fetch TFA deals (${res.status})`)
   return res.json()
 }
-
+// Create a new TFA deal
 export async function createTFADeal(authHeader, fromMemberId, toMemberId, amount, description) {
   const res = await fetch(`${API_BASE}/tfa`, {
     method: 'POST',
@@ -17,9 +19,10 @@ export async function createTFADeal(authHeader, fromMemberId, toMemberId, amount
       title: `${fromMemberId} → ${toMemberId}: ${amount}`,
       status: 'publish',
       acf: {
-        from_member: fromMemberId,
-        to_member: toMemberId,
-        deal_amount: amount
+        from_member: fromMemberId,        // number
+        to_member: toMemberId,            // number
+        deal_amount: amount,              // number — plain integer now
+        deal_description: description || ''
       }
     })
   })

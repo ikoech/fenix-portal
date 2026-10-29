@@ -57,3 +57,80 @@
   color: #999;
   font-size: 0.85rem;
 }
+.tfa-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.tfa-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  background: #fff;
+}
+/* --- filter buttons --- */
+.tfa-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tfa-filter {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tfa-filter.active {
+  background: #F5A623;
+  border-color: #F5A623;
+  color: #fff;
+}
+
+/* --- badge on deal cards --- */
+.deal-badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* --- success message --- */
+.success-msg {
+  color: #2e7d32;
+  text-align: center;
+  background: #f0faf1;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+/* --- textarea sizing --- */
+.deal-form textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  font: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.tfa-stat-label { font-size: 0.85rem; color: #666; }
+.tfa-stat-value { font-size: 1.6rem; font-weight: 700; color: #F5A623; }
+.tfa-stat-sub   { font-size: 0.9rem; color: #444; }
+.tfa-stat-total { border-color: currentColor; }
+
+.deal-form input,
+.deal-form select { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
