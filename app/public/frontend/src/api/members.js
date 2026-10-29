@@ -8,9 +8,7 @@ async function readResponse(res, failureMessage) {
   return data
 }
 
-export async function fetchMembers(authHeader) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
-
+export async function fetchMembers() {
   const members = []
   const perPage = 100
   let page = 1
@@ -18,8 +16,7 @@ export async function fetchMembers(authHeader) {
 
   do {
     const res = await fetch(`${FENIX_API}/members?per_page=${perPage}&page=${page}`, {
-      cache: 'no-store',
-      headers: { Authorization: authHeader }
+      cache: 'no-store'
     })
     const data = await readResponse(res, 'Failed to fetch members')
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { login } from './api/auth'
-import StartPage from './components/StartPage'      // ← new
 import Login from './components/Login'
 import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'
@@ -19,7 +18,6 @@ function App() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('events')
-  const [view, setView] = useState('start')    
   const [showLogin, setShowLogin] = useState(false)
 
   // Restore session on load
@@ -64,7 +62,6 @@ function App() {
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
       sessionStorage.setItem('fenix_auth', authHeader)
       setShowLogin(false)
-      setView('portal')
     } catch (err) {
       setError(err.message)
     }
@@ -73,6 +70,7 @@ function App() {
   // Handle logout
   const handleLogout = () => {
     setUser(null)
+    setActiveTab('events')
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
@@ -81,33 +79,6 @@ function App() {
 
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
 
-  // ── Public start page ─────────────────────────────
-    if (view === 'start') {
-      return (
-      <>
-        <Header user={user} onLogout={handleLogout} />
-        <StartPage
-          loggedIn={!!user}
-          onJoin={() => {
-            if (user) { setView('portal'); setActiveTab('members'); }
-            else setShowLogin(true);
-          }}
-          onEnterPortal={() => setView('portal')}
-        />
-        {showLogin && (
-          <div className="modal-backdrop" onClick={() => setShowLogin(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={() => setShowLogin(false)} aria-label="Stäng">×</button>
-              <Login onLogin={handleLogin} error={error} />
-            </div>
-          </div>
-        )}
-        <Footer />
-      </>
-      )
-    }
-
-   
   return (
     <div className="app">
       <Header
@@ -116,27 +87,47 @@ function App() {
         showTabs={!!user}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        setView={setView}
         isAdmin={isAdmin}
+        showPublicTabs={!user}
+        onRequestLogin={() => setShowLogin(true)}
       />
 
       <main>
-        {!user ? (
-          <Login onLogin={handleLogin} error={error} />
-        ) : (
-          <>
-            {activeTab === 'admin' && <AdminTab user={user} />}
-            {activeTab === 'events' && <EventsTab user={user} />}
-            {activeTab === 'profile' && <ProfileTab user={user} />}
-            {activeTab === 'members' && <MembersTab />}
-            {activeTab === 'tfa' && <TfaTab user={user} />}
-            {activeTab === 'seeking' && <SeekingTab user={user} />}
-            {activeTab === 'Documents' && <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />}
-          </>
+        {error && !showLogin && <p className="error-msg" role="alert">{error}</p>}
+        {activeTab === 'events' && (
+          <EventsTab user={user} onRequireLogin={() => setShowLogin(true)} />
+        )}
+        {activeTab === 'members' && <MembersTab />}
+        {user && activeTab === 'admin' && <AdminTab user={user} />}
+        {user && activeTab === 'profile' && <ProfileTab user={user} />}
+        {user && activeTab === 'tfa' && <TfaTab user={user} />}
+        {user && activeTab === 'seeking' && <SeekingTab user={user} />}
+        {user && activeTab === 'Documents' && (
+          <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />
         )}
       </main>
 
       <Footer />
+      {showLogin && !user && (
+        <div className="modal-backdrop" onClick={() => setShowLogin(false)}>
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Member login"
+            onClick={event => event.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setShowLogin(false)}
+              aria-label="Close login"
+            >
+              ×
+            </button>
+            <Login onLogin={handleLogin} error={error} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

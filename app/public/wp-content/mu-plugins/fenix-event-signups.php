@@ -14,19 +14,28 @@ add_action(
 			'fenix/v1',
 			'/event-signups',
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => 'fenix_create_event_signup',
-				'permission_callback' => static function () {
-					return current_user_can( 'read' );
-				},
-				'args'                => array(
-					'event_id' => array(
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'validate_callback' => static function ( $value ) {
-							return absint( $value ) > 0;
-						},
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => 'fenix_get_event_signup_summary',
+					'permission_callback' => static function () {
+						return is_user_logged_in() && current_user_can( 'read' );
+					},
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => 'fenix_create_event_signup',
+					'permission_callback' => static function () {
+						return is_user_logged_in() && current_user_can( 'read' );
+					},
+					'args'                => array(
+						'event_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'validate_callback' => static function ( $value ) {
+								return absint( $value ) > 0;
+							},
+						),
 					),
 				),
 			)
@@ -39,7 +48,7 @@ add_action(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => 'fenix_delete_event_signup',
 				'permission_callback' => static function () {
-					return current_user_can( 'read' );
+					return is_user_logged_in() && current_user_can( 'read' );
 				},
 				'args'                => array(
 					'id' => array(
@@ -52,6 +61,133 @@ add_action(
 		);
 	}
 );
+
+add_filter( 'rest_pre_dispatch', 'fenix_restrict_event_signup_rest_api', 10, 3 );
+
+function fenix_restrict_event_signup_rest_api( $result, $server, WP_REST_Request $request ) {
+	if ( ! preg_match( '#^/wp/v2/event-signups(?:/|$)#', $request->get_route() ) ) {
+		return $result;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error(
+			'fenix_private_event_signups',
+			'Authentication is required to access event signups.',
+			array( 'status' => 401 )
+		);
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return new WP_Error(
+			'fenix_forbidden_event_signups',
+			'You are not allowed to access event signup records.',
+			array( 'status' => 403 )
+		);
+	}
+
+	return $result;
+}
+
+add_filter( 'rest_pre_dispatch', 'fenix_restrict_private_post_rest_api', 10, 3 );
+add_filter( 'rest_pre_dispatch', 'fenix_restrict_event_rest_writes', 10, 3 );
+add_filter( 'register_post_type_args', 'fenix_restrict_private_post_type_queries', 10, 2 );
+
+function fenix_restrict_private_post_rest_api( $result, $server, WP_REST_Request $request ) {
+	$private_routes = array(
+		'/wp/v2/documents',
+		'/wp/v2/seeking',
+		'/wp/v2/tfa',
+	);
+	$route          = $request->get_route();
+	$is_private     = false;
+
+	foreach ( $private_routes as $private_route ) {
+		if ( preg_match( '#^' . preg_quote( $private_route, '#' ) . '(?:/|$)#', $route ) ) {
+			$is_private = true;
+			break;
+		}
+	}
+
+	if ( ! $is_private || is_user_logged_in() ) {
+		return $result;
+	}
+
+	return new WP_Error(
+		'fenix_private_portal_data',
+		'Authentication is required to access this resource.',
+		array( 'status' => 401 )
+	);
+}
+
+function fenix_restrict_event_rest_writes( $result, $server, WP_REST_Request $request ) {
+	if (
+		! preg_match( '#^/wp/v2/event(?:/|$)#', $request->get_route() ) ||
+		in_array( $request->get_method(), array( 'GET', 'HEAD', 'OPTIONS' ), true )
+	) {
+		return $result;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error(
+			'fenix_event_write_auth_required',
+			'Authentication is required to modify events.',
+			array( 'status' => 401 )
+		);
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return new WP_Error(
+			'fenix_forbidden_event_write',
+			'You are not allowed to modify events.',
+			array( 'status' => 403 )
+		);
+	}
+
+	return $result;
+}
+
+function fenix_restrict_private_post_type_queries( $args, $post_type ) {
+	if ( in_array( $post_type, array( 'document', 'event_signup', 'seeking', 'tfa' ), true ) ) {
+		$args['publicly_queryable'] = false;
+		$args['exclude_from_search'] = true;
+		$args['has_archive']         = false;
+	}
+
+	return $args;
+}
+
+function fenix_get_event_signup_summary() {
+	$signup_ids = get_posts(
+		array(
+			'post_type'      => 'event_signup',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		)
+	);
+	$counts     = array();
+	$mine       = array();
+	$user_id    = get_current_user_id();
+
+	foreach ( $signup_ids as $signup_id ) {
+		$event_id = absint( get_post_meta( $signup_id, 'event_id', true ) );
+		if ( ! $event_id ) {
+			continue;
+		}
+
+		$counts[ $event_id ] = isset( $counts[ $event_id ] ) ? $counts[ $event_id ] + 1 : 1;
+		if ( absint( get_post_meta( $signup_id, 'member_id', true ) ) === $user_id ) {
+			$mine[ $event_id ] = (int) $signup_id;
+		}
+	}
+
+	return rest_ensure_response(
+		array(
+			'counts'    => $counts,
+			'signupIds' => $mine,
+		)
+	);
+}
 
 function fenix_create_event_signup( WP_REST_Request $request ) {
 	$event_id = absint( $request->get_param( 'event_id' ) );

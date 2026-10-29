@@ -7,6 +7,24 @@ export async function fetchEvents() {
   return res.json()
 }
 
+export async function fetchEventSignupSummary(authHeader) {
+  if (!authHeader) throw new Error('Not logged in — please log in.')
+
+  const res = await fetch(SIGNUPS_API, {
+    cache: 'no-store',
+    headers: { Authorization: authHeader }
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => null)
+    throw new Error(error?.message || `Failed to fetch signup summary (${res.status})`)
+  }
+  const summary = await res.json()
+  if (!summary || typeof summary !== 'object' || !summary.counts || !summary.signupIds) {
+    throw new Error('The event signup summary response was invalid.')
+  }
+  return summary
+}
+
 export async function createEventSignup(authHeader, eventId) {
   const res = await fetch(SIGNUPS_API, {
     method: 'POST',
@@ -37,8 +55,12 @@ export async function deleteEventSignup(authHeader, signupId) {
   return res.json()
 }
 
-export async function fetchEventSignups() {
-  const res = await fetch(`${API_BASE}/event-signups`)
+export async function fetchEventSignups(authHeader) {
+  if (!authHeader) throw new Error('Not logged in — please log in.')
+
+  const res = await fetch(`${API_BASE}/event-signups`, {
+    headers: { Authorization: authHeader }
+  })
   if (!res.ok) throw new Error(`Failed to fetch signups (${res.status})`)
   return res.json()
 }

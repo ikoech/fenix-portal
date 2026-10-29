@@ -10,15 +10,9 @@ function MembersTab() {
 
   useEffect(() => {
     let isCurrent = true
-    const authHeader = sessionStorage.getItem('fenix_auth')
-    if (!authHeader) {
-      setError('Not logged in. Please log in again.')
-      setLoading(false)
-      return
-    }
 
     // Fetch members from the API and handle loading, error, and data states
-    fetchMembers(authHeader)
+    fetchMembers()
       .then(data => {
         if (!isCurrent) return
         if (!Array.isArray(data)) {
@@ -67,12 +61,6 @@ function MembersTab() {
 
     const searchableValues = [
       member.name,
-      member.email,
-      member.first_name,
-      member.last_name,
-      member.nickname,
-      member.user_login,
-      ...(Array.isArray(member.roles) ? member.roles : []),
       member.acf
     ]
     const searchableText = normalizeSearchText(
@@ -113,8 +101,8 @@ function MembersTab() {
             {filtered.map(member => (
               <div className="member-card" key={member.id}>
                 <div className="member-image-wrap">
-                  {(member.acf?.photo || member.acf?.avatar_url) ? (
-                    <img src={member.acf.photo || member.acf.avatar_url} alt={member.name} className="member-image" />
+                  {member.acf?.photo ? (
+                    <img src={member.acf.photo} alt={member.name} className="member-image" />
                   ) : (
                     <div className="member-avatar">
                       {(member.name || 'M').charAt(0).toUpperCase()}
@@ -124,15 +112,10 @@ function MembersTab() {
 
                 <div className="member-info">
                   <h3 className="member-name">{member.name || 'Unknown'}</h3>
-                  {(member.acf?.role || member.roles?.length > 0) && (
-                    <p className="member-role">{member.acf?.role || member.roles.join(', ')}</p>
-                  )}
+                  {member.acf?.role && <p className="member-role">{member.acf.role}</p>}
                   {member.acf?.company && <p className="member-company">{member.acf.company}</p>}
                   {member.acf?.industry && <p className="member-industry">{member.acf.industry}</p>}
                   {member.acf?.bio && <p className="member-bio">{member.acf.bio}</p>}
-                  {member.acf?.phone && <p className="member-phone">Phone: {member.acf.phone}</p>}
-                  {member.acf?.interests && <p className="member-interests">Interests: {member.acf.interests}</p>}
-                  {member.email && <p className="member-email"><a href={`mailto:${member.email}`}>{member.email}</a></p>}
                   {member.acf?.website && (
                     <p className="member-website">
                       <a href={member.acf.website} target="_blank" rel="noopener noreferrer">Website</a>
@@ -141,7 +124,6 @@ function MembersTab() {
                 </div>
 
                 <div className="member-actions">
-                  {member.email && <a href={`mailto:${member.email}`} className="btn-contact">Contact</a>}
                   {member.acf?.linkedin && (
                     <a href={member.acf.linkedin} target="_blank" rel="noopener noreferrer" className="btn-linkedin">LinkedIn</a>
                   )}

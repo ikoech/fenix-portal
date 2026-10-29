@@ -35,6 +35,7 @@ main {
 }
 
 .tab {
+  display: inline-block;
   padding: 0.5rem 1.25rem;
   border: 2px solid #4A7C89;
   background: white;
@@ -44,6 +45,7 @@ main {
   font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.2s;
+  text-decoration: none;
 }
 
 .tab:hover {
@@ -88,17 +90,31 @@ main {
   color: #d64545;
   margin-bottom: 1rem;
 }
+
 .modal-backdrop {
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 100;
 }
+
 .modal {
-  background: #fff; border-radius: 8px; padding: 32px;
-  width: min(420px, 90vw); position: relative;
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  width: min(420px, 90vw);
+  position: relative;
 }
+
 .modal-close {
-  position: absolute; top: 8px; right: 12px;
-  border: none; background: none; font-size: 1.5rem; cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }

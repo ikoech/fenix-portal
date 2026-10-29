@@ -39,9 +39,7 @@ add_action(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => 'fenix_get_member_directory',
-				'permission_callback' => static function () {
-					return is_user_logged_in();
-				},
+				'permission_callback' => '__return_true',
 				'args'                => array(
 					'per_page' => array(
 						'default'           => 100,
@@ -63,6 +61,33 @@ add_action(
 	}
 );
 
+add_filter( 'rest_pre_dispatch', 'fenix_restrict_public_user_rest_api', 10, 3 );
+
+function fenix_restrict_public_user_rest_api( $result, $server, WP_REST_Request $request ) {
+	$route = $request->get_route();
+	if ( ! preg_match( '#^/wp/v2/users(?:/|$)#', $route ) || '/wp/v2/users/me' === $route ) {
+		return $result;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error(
+			'fenix_private_user_directory',
+			'Authentication is required to access user records.',
+			array( 'status' => 401 )
+		);
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return new WP_Error(
+			'fenix_forbidden_user_directory',
+			'You are not allowed to access user records.',
+			array( 'status' => 403 )
+		);
+	}
+
+	return $result;
+}
+
 function fenix_get_member_directory( WP_REST_Request $request ) {
 	$per_page    = absint( $request->get_param( 'per_page' ) );
 	$page        = absint( $request->get_param( 'page' ) );
@@ -79,7 +104,7 @@ function fenix_get_member_directory( WP_REST_Request $request ) {
 	);
 	$members     = array_map(
 		static function ( $user ) {
-			return fenix_get_member_profile_data( $user->ID );
+			return fenix_get_public_member_profile_data( $user->ID );
 		},
 		$users
 	);
@@ -98,6 +123,12 @@ add_filter(
 		}
 
 		$data = $response->get_data();
+		if ( ! is_user_logged_in() ) {
+			unset( $data['email'], $data['acf'] );
+			$response->set_data( $data );
+			return $response;
+		}
+
 		$acf  = isset( $data['acf'] ) && is_array( $data['acf'] ) ? $data['acf'] : array();
 
 		foreach ( array( 'company', 'phone', 'bio', 'interests', 'industry', 'role', 'website', 'linkedin', 'avatar_url' ) as $field ) {
@@ -257,4 +288,31 @@ function fenix_get_member_profile_data( $user_id ) {
 		'roles'        => array_values( $user->roles ),
 		'acf'          => $acf,
 	);
+}
+
+function fenix_get_public_member_profile_data( $user_id ) {
+	$profile = fenix_get_member_profile_data( $user_id );
+	$acf     = $profile['acf'];
+
+	return array(
+		'id'   => $profile['id'],
+		'name' => $profile['name'],
+		'acf'  => array(
+			'company'  => fenix_public_profile_text( $acf['company'] ),
+			'bio'      => fenix_public_profile_text( $acf['bio'] ),
+			'industry' => fenix_public_profile_text( $acf['industry'] ),
+			'role'     => fenix_public_profile_text( $acf['role'] ),
+			'website'  => fenix_public_profile_url( $acf['website'] ),
+			'linkedin' => fenix_public_profile_url( $acf['linkedin'] ),
+			'photo'    => fenix_public_profile_url( $acf['avatar_url'] ),
+		),
+	);
+}
+
+function fenix_public_profile_text( $value ) {
+	return is_scalar( $value ) ? (string) $value : '';
+}
+
+function fenix_public_profile_url( $value ) {
+	return is_scalar( $value ) ? esc_url_raw( (string) $value ) : '';
 }
