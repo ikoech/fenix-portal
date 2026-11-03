@@ -1,0 +1,181 @@
+import { useEffect, useState } from 'react'
+import '../css/StartPage.css'
+
+const API = 'http://fenix-portal.local/wp-json/wp/v2'
+
+const fmtKr = n => new Intl.NumberFormat('sv-SE').format(n) + ' kr'
+
+/** ACF date picker returns compact "Ymd" e.g. "20261103" → parse manually */
+function parseAcfDate(ymd) {
+  if (!ymd || typeof ymd !== 'string') return null
+  const clean = ymd.replace(/[^0-9]/g, '')
+  if (clean.length < 8) return null
+  const y = +clean.slice(0, 4), m = +clean.slice(4, 6) - 1, d = +clean.slice(6, 8)
+  const dt = new Date(y, m, d)
+  return isNaN(dt) ? null : dt
+}
+
+const fmtDate = iso => {
+  const d = parseAcfDate(iso)
+  if (!d) return 'Inget datum'
+  return d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+const isThisWeek = iso => {
+  const d = parseAcfDate(iso)
+  if (!d) return false
+  const now = new Date()
+  const mon = new Date(now)
+  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7))
+  mon.setHours(0, 0, 0, 0)
+  const sun = new Date(mon)
+  sun.setDate(mon.getDate() + 7)
+  return d >= mon && d < sun
+}
+
+export default function StartPage({ user }) {
+  const [stats, setStats] = useState({ members: null, week: null, attending: null, tfa: null })
+  const [events, setEvents] = useState([])
+  const [attendees, setAttendees] = useState([])
+  const [err, setErr] = useState(null)
+
+  useEffect(() => {
+    const auth = sessionStorage.getItem('fenix_auth')
+    const headers = auth ? { Authorization: auth } : {}
+    let live = true
+
+    async function load() {
+      try {
+        // Member count via X-WP Total header
+        const usersRes = await fetch(`${API}/users?per_page=1`, { headers })
+        const memberCount = Number(usersRes.headers.get('X-WP-Total')) || 0
+
+        // Events ascending by ACF date (client-side sort since meta isn't queryable)
+        const evRes = await fetch(`${API}/event?per_page=20&_embed=1`, { headers })
+        const evs = await evRes.json()
+        evs.sort((a, b) => {
+          const da = parseAcfDate(a.acf?.event_date)
+          const db = parseAcfDate(b.acf?.event_date)
+          if (!da) return 1
+          if (!db) return -1
+          return da - db
+        })
+
+        // TFA total sum deal_amount across all pages
+        let tfa = 0, page = 1, more = true
+        while (more) {
+          const res = await fetch(`${API}/tfa?per_page=100&page=${page}`, { headers })
+          const rows = await res.json()
+          tfa += rows.reduce((s, r) => s + (Number(r.acf?.deal_amount) || 0), 0)
+          more = Number(res.headers.get('X-WP-TotalPages')) > page
+          page += 1
+        }
+
+        // Attendees of next event supports acf.attendees or acf.rsvps as IDs or objects
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const next = evs.find(e => {
+          const d = parseAcfDate(e.acf?.event_date)
+          return d && d >= today
+        }) ?? evs[0]
+
+        let people = []
+        const raw = next?.acf?.attendees ?? next?.acf?.rsvps ?? []
+        if (raw.length) {
+          if (typeof raw[0] === 'object') {
+            people = raw.map(u => ({ id: u.id, name: u.name, avatar_url: u.avatar_url }))
+          } else {
+            const uRes = await fetch(`${API}/users?include=${raw.join(',')}&per_page=100`, { headers })
+            people = (await uRes.json()).map(u => ({
+              id: u.id, name: u.name, avatar_url: u.acf?.avatar_url,
+            }))
+          }
+        }
+
+        if (!live) return
+        setEvents(evs)
+        setAttendees(people)
+        setStats({
+          members: memberCount,
+          week: evs.filter(e => isThisWeek(e.acf?.event_date)).length,
+          attending: people.length,
+          tfa,
+        })
+      } catch (e) {
+        if (live) setErr(e.message)
+      }
+    }
+
+    load()
+    return () => { live = false }
+  }, [])
+
+  const cards = [
+    { label: 'Medlemmar totalt', value: stats.members },
+    { label: 'Veckans event', value: stats.week },
+    { label: 'Kommande', value: stats.attending },
+    { label: 'TFA totalt', value: stats.tfa !== null ? fmtKr(stats.tfa) : null },
+  ]
+
+  return (
+    <div className="startpage">
+      <section className="sp-hero">
+        <h1>Hej, {user?.name} 👋</h1>
+        <p>Welcome to Fenix Medlemsportal</p>
+      </section>
+
+      {err && <p className="error-msg">{err}</p>}
+
+      <section className="sp-stats">
+        {cards.map(c => (
+          <article className="stat-card" key={c.label}>
+            <span className="stat-value">{c.value ?? '–'}</span>
+            <span className="stat-label">{c.label}</span>
+          </article>
+        ))}
+      </section>
+
+      <div className="sp-grid">
+        <section className="sp-panel">
+          <h2>Kommande event</h2>
+          {events.length === 0 && <p className="muted">No upcoming events.</p>}
+          <ul className="event-list">
+            {events.slice(0, 5).map(ev => (
+              <li key={ev.id}>
+                <div>
+                  <strong dangerouslySetInnerHTML={{ __html: ev.title?.rendered ?? '' }} />
+                  <small>
+                    {fmtDate(ev.acf?.event_date)}
+                    {ev.acf?.event_time ? ` ${ev.acf.event_time}` : ''}
+                    {ev.acf?.location ? ` · ${ev.acf.location}` : ''}
+                  </small>
+                </div>
+                <span className="pill">
+                  {(ev.acf?.attendees?.length ?? ev.acf?.rsvps?.length ?? 0)} attendees
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="sp-panel">
+          <h2>Next coming events</h2>
+          {attendees.length === 0 && <p className="muted">No attendees yet.</p>}
+          <ul className="member-list">
+            {attendees.map(m => (
+              <li key={m.id}>
+                <img
+                  className="avatar"
+                  src={m.avatar_url}
+                  alt=""
+                  onError={e => { e.target.style.display = 'none' }}
+                />
+                <span>{m.name}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  )
+}

@@ -11,13 +11,14 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
 import { fetchUserProfile } from './api/auth'
+import StartPage from './components/StartPage'
 import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('events')
+  const [activeTab, setActiveTab] = useState('start')
   const [showLogin, setShowLogin] = useState(false)
 
   // Restore session on load
@@ -70,7 +71,7 @@ function App() {
   // Handle logout
   const handleLogout = () => {
     setUser(null)
-    setActiveTab('events')
+    setActiveTab('start')
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
   }
@@ -80,7 +81,7 @@ function App() {
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
 
   return (
-    <div className="app">
+    <div className={`app${user && activeTab === 'start' ? ' app--start' : ''}`}>
       <Header
         user={user}
         onLogout={handleLogout}
@@ -104,6 +105,17 @@ function App() {
         {user && activeTab === 'seeking' && <SeekingTab user={user} />}
         {user && activeTab === 'Documents' && (
           <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />
+        )}
+        {user && activeTab === 'start' && <StartPage user={user} />}
+
+        {!user && activeTab === 'start' && (
+          <section className="start-gate">
+            <h2>Välkommen till Fenix Medlemsportal</h2>
+            <p>Logga in för att se din personliga startsida.</p>
+            <button className="btn-primary" onClick={() => setShowLogin(true)}>
+              Logga in
+            </button>
+          </section>
         )}
       </main>
 

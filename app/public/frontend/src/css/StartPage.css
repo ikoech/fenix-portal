@@ -1,0 +1,78 @@
+/* Remove the entire overlay approach. Background goes behind everything. */
+.startpage{
+  position:relative;
+  padding-bottom:2rem;
+}
+.sp-hero{
+  text-align:center;
+  padding:clamp(2.5rem,6vw,5rem) 1rem clamp(1.5rem,3vw,3rem);
+}
+.sp-hero h1{
+  color:#fff;
+  font-size:clamp(1.8rem,4vw,2.6rem);
+  margin:0;
+  text-shadow:0 2px 8px rgba(0,0,0,.45);
+}
+.sp-hero p{
+  color:rgba(255,255,255,.9);
+  margin:.3rem 0 0;
+  font-size:1.05rem;
+  text-shadow:0 1px 4px rgba(0,0,0,.35);
+}
+
+.sp-stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:1rem;
+  margin-bottom:1.5rem;
+  padding:0 clamp(1rem,4vw,3rem);
+}
+.stat-card{
+  background:#fff;
+  border-radius:12px;
+  padding:1.25rem;
+  display:flex;
+  flex-direction:column;
+  gap:.25rem;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+  border-top:4px solid #f26522;
+}
+.stat-value{font-size:1.7rem;font-weight:700;color:#0f8b8d}
+.stat-label{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:#5a6b70}
+
+/* Two column grid full width */
+.sp-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:1rem;
+  padding:0 clamp(1rem,4vw,3rem);
+}
+@media(max-width:860px){.sp-grid{grid-template-columns:1fr}}
+
+.sp-panel{
+  background:#fff;
+  border-radius:12px;
+  padding:1.25rem;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+.sp-panel h2{margin:0 0 .75rem;font-size:1.05rem;color:#0f8b8d}
+
+.event-list,.member-list{list-style:none;margin:0;padding:0}
+.event-list li{
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.65rem 0;border-bottom:1px solid #eef2f3;
+}
+.event-list small{display:block;color:#6b7c81}
+.pill{background:rgba(15,139,141,.12);color:#0f8b8d;border-radius:999px;padding:.15rem .6rem;font-size:.8rem;white-space:nowrap}
+.member-list li{display:flex;align-items:center;gap:.6rem;padding:.45rem 0}
+.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#dfe7e9}
+.muted{color:#8a979b}
+
+/* Public gate white card on the same background */
+.start-gate{
+  text-align:center;
+  padding:4rem 1rem;
+}
+.start-gate h2{color:#333;font-size:1.8rem}
+.start-gate p{color:#555;margin:.5rem 0 1.5rem}
+.btn-primary{background:#f26522;color:#fff;border:none;border-radius:8px;padding:.6rem 1.4rem;font-size:1rem;cursor:pointer}
