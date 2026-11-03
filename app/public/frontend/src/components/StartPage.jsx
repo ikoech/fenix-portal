@@ -14,13 +14,13 @@ function parseAcfDate(ymd) {
   const dt = new Date(y, m, d)
   return isNaN(dt) ? null : dt
 }
-
+/** Format ACF date to string */
 const fmtDate = iso => {
   const d = parseAcfDate(iso)
   if (!d) return 'Inget datum'
   return d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' })
 }
-
+/** Check if ACF date is within this week */
 const isThisWeek = iso => {
   const d = parseAcfDate(iso)
   if (!d) return false
@@ -32,7 +32,7 @@ const isThisWeek = iso => {
   sun.setDate(mon.getDate() + 7)
   return d >= mon && d < sun
 }
-
+/** Start page component */
 export default function StartPage({ user }) {
   const [stats, setStats] = useState({ members: null, week: null, attending: null, tfa: null })
   const [events, setEvents] = useState([])
@@ -121,7 +121,7 @@ export default function StartPage({ user }) {
     <div className="startpage">
       <section className="sp-hero">
         <h1>Hej, {user?.name} 👋</h1>
-        <p>Welcome to Fenix Medlemsportal</p>
+        <p>Välkommen till Fenix Medlemsportal</p>
       </section>
 
       {err && <p className="error-msg">{err}</p>}
@@ -138,20 +138,20 @@ export default function StartPage({ user }) {
       <div className="sp-grid">
         <section className="sp-panel">
           <h2>Kommande event</h2>
-          {events.length === 0 && <p className="muted">No upcoming events.</p>}
+          {events.length === 0 && <p className="muted">Inga kommande event.</p>}
           <ul className="event-list">
             {events.slice(0, 5).map(ev => (
               <li key={ev.id}>
                 <div>
-                  <strong dangerouslySetInnerHTML={{ __html: ev.title?.rendered ?? '' }} />
-                  <small>
+                  <strong className="ev-title" dangerouslySetInnerHTML={{ __html: ev.title?.rendered ?? '' }} />
+                  <small className="ev-meta">
                     {fmtDate(ev.acf?.event_date)}
                     {ev.acf?.event_time ? ` ${ev.acf.event_time}` : ''}
                     {ev.acf?.location ? ` · ${ev.acf.location}` : ''}
                   </small>
                 </div>
                 <span className="pill">
-                  {(ev.acf?.attendees?.length ?? ev.acf?.rsvps?.length ?? 0)} attendees
+                  {(ev.acf?.attendees?.length ?? ev.acf?.rsvps?.length ?? 0)}                   deltagare
                 </span>
               </li>
             ))}
@@ -159,8 +159,8 @@ export default function StartPage({ user }) {
         </section>
 
         <section className="sp-panel">
-          <h2>Next coming events</h2>
-          {attendees.length === 0 && <p className="muted">No attendees yet.</p>}
+          <h2>Kommer nästa event</h2>
+          {attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
           <ul className="member-list">
             {attendees.map(m => (
               <li key={m.id}>

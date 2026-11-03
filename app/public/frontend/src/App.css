@@ -22,7 +22,9 @@ body, html, #root, .app {
 
 /* StartPage background: on the whole app so it sits behind header and footer */
 .app--start {
-  background: url('https://natverketfenix.se/wp-content/uploads/2026/04/chuttersnap-M2-_GRvWWg0-unsplash-2048x1367.jpg') center / cover no-repeat fixed;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.7) 40%, #fff 80%),
+    url('https://natverketfenix.se/wp-content/uploads/2026/04/chuttersnap-M2-_GRvWWg0-unsplash-2048x1367.jpg') center top / cover no-repeat scroll;
 }
 .app--start > main {
   max-width: none;
@@ -31,15 +33,14 @@ body, html, #root, .app {
 .app--start .site-header,
 .app--start .site-footer {
   background: transparent;
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  border-color: transparent;
+  color: #2c3e50;
 }
 .app--start .site-footer p,
 .app--start .site-info h1,
 .app--start .site-info p,
 .app--start .user-bar {
-  color: #fff;
+  color: #2c3e50;
 }
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
