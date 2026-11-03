@@ -8,7 +8,7 @@ export async function fetchTFADeals(authHeader) {
   return res.json()
 }
 // Create a new TFA deal
-export async function createTFADeal(authHeader, fromMemberId, toMemberId, amount, description) {
+export async function createTFADeal(authHeader, fromMemberId, toMemberId, amount, description, dealType ='') {
   const res = await fetch(`${API_BASE}/tfa`, {
     method: 'POST',
     headers: {
@@ -22,7 +22,8 @@ export async function createTFADeal(authHeader, fromMemberId, toMemberId, amount
         from_member: fromMemberId,        // number
         to_member: toMemberId,            // number
         deal_amount: amount,              // number — plain integer now
-        deal_description: description || ''
+        deal_description: description || '',
+        deal_type: dealType || ''
       }
     })
   })

@@ -21,7 +21,12 @@ function EventsTab({ user, onRequireLogin }) {
   const [formMessage, setFormMessage] = useState('')
   const [newDescription, setNewDescription] = useState('')
 
-  const query = search.trim().toLowerCase()
+  // WP returns title.rendered HTML-encoded (e.g. "Veckom&#246;te"), so decode before matching
+  const normalize = value => {
+    const doc = new DOMParser().parseFromString(String(value || ''), 'text/html')
+    return (doc.documentElement.textContent || '').normalize('NFC').toLowerCase()
+  }
+  const query = normalize(search.trim())
   const filteredEvents = events.filter(event => {
     if (!query) return true
 
@@ -31,7 +36,7 @@ function EventsTab({ user, onRequireLogin }) {
       event.acf?.location,
       event.acf?.event_date,
       event.acf?.event_time
-    ].some(value => String(value || '').toLowerCase().includes(query))
+    ].some(value => normalize(value).includes(query))
   })
 
   useEffect(() => {

@@ -134,3 +134,18 @@
 
 .deal-form input,
 .deal-form select { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+.tfa-periods { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+
+.tfa-stat-hint { font-size: 0.75rem; color: #999; font-style: italic; }
+
+.tfa-type-group { border: 1px solid #ddd; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.tfa-type-group legend { font-weight: 600; color: #2C3E50; padding: 0 0.4rem; font-size: 0.95rem; }
+.tfa-type-option { display: flex; align-items: flex-start; gap: 0.5rem; font-weight: normal; margin-bottom: 0.4rem; cursor: pointer; }
+.tfa-type-option:last-child { margin-bottom: 0; }
+.tfa-type-option span { font-size: 0.9rem; color: #555; }
+.tfa-type-option strong { color: #2C3E50; }
+
+.deal-type-badge { margin-left: 0.5rem; font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 999px; }
+.deal-type-badge.tfa { background: #fff3e0; color: #b26a00; }
+.deal-type-badge.referens { background: #e3f2fd; color: #1565c0; }
+.deal-amount-ref { color: #999; font-style: italic; }
