@@ -168,26 +168,30 @@ function fenix_get_event_signup_summary() {
 	$counts     = array();
 	$mine       = array();
 	$attendees  = array();
+	$cancelled  = array();
 	$seen       = array();
+	$cancelled_seen = array();
 	$members    = array();
 	$user_id    = get_current_user_id();
 
 	foreach ( $signup_ids as $signup_id ) {
 		$event_id  = absint( get_post_meta( $signup_id, 'event_id', true ) );
 		$member_id = absint( get_post_meta( $signup_id, 'member_id', true ) );
+		$cancelled_at = get_post_meta( $signup_id, 'cancelled_at', true );
 		if ( ! $event_id ) {
 			continue;
 		}
 
-		$counts[ $event_id ] = isset( $counts[ $event_id ] ) ? $counts[ $event_id ] + 1 : 1;
-		if ( $member_id === $user_id ) {
+		if ( ! $cancelled_at ) {
+			$counts[ $event_id ] = isset( $counts[ $event_id ] ) ? $counts[ $event_id ] + 1 : 1;
+		}
+		if ( $member_id === $user_id && ! $cancelled_at ) {
 			$mine[ $event_id ] = (int) $signup_id;
 		}
 
-		if ( ! $member_id || isset( $seen[ $event_id ][ $member_id ] ) ) {
+		if ( ! $member_id ) {
 			continue;
 		}
-		$seen[ $event_id ][ $member_id ] = true;
 
 		if ( ! array_key_exists( $member_id, $members ) ) {
 			$members[ $member_id ] = null;
@@ -201,8 +205,28 @@ function fenix_get_event_signup_summary() {
 			}
 		}
 
-		if ( $members[ $member_id ] ) {
-			$attendees[ $event_id ][] = $members[ $member_id ];
+		if ( ! $members[ $member_id ] ) {
+			continue;
+		}
+
+		if ( $cancelled_at ) {
+			if ( isset( $cancelled_seen[ $event_id ][ $member_id ] ) ) {
+				continue;
+			}
+			$cancelled_seen[ $event_id ][ $member_id ] = true;
+			$cancelled[ $event_id ][] = array_merge(
+				$members[ $member_id ],
+				array( 'cancelled_at' => $cancelled_at )
+			);
+		} else {
+			if ( isset( $seen[ $event_id ][ $member_id ] ) ) {
+				continue;
+			}
+			$seen[ $event_id ][ $member_id ] = true;
+			$attendees[ $event_id ][] = array_merge(
+				$members[ $member_id ],
+				array( 'signup_date' => get_post_meta( $signup_id, 'signup_date', true ) )
+			);
 		}
 	}
 
@@ -211,6 +235,7 @@ function fenix_get_event_signup_summary() {
 			'counts'    => $counts,
 			'signupIds' => $mine,
 			'attendees' => (object) $attendees,
+			'cancelled' => (object) $cancelled,
 		)
 	);
 }
@@ -243,6 +268,10 @@ function fenix_create_event_signup( WP_REST_Request $request ) {
 				array(
 					'key'   => 'event_id',
 					'value' => $event_id,
+				),
+				array(
+					'key'     => 'cancelled_at',
+					'compare' => 'NOT EXISTS',
 				),
 			),
 		)
@@ -318,13 +347,13 @@ function fenix_delete_event_signup( WP_REST_Request $request ) {
 		);
 	}
 
-	if ( ! wp_delete_post( $signup->ID, true ) ) {
+	if ( ! update_post_meta( $signup->ID, 'cancelled_at', current_time( 'mysql' ) ) ) {
 		return new WP_Error(
-			'fenix_signup_delete_failed',
+			'fenix_signup_cancel_failed',
 			'The signup could not be cancelled.',
 			array( 'status' => 500 )
 		);
 	}
 
-	return new WP_REST_Response( array( 'deleted' => true ) );
+	return new WP_REST_Response( array( 'cancelled' => true ) );
 }

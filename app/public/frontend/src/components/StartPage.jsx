@@ -37,9 +37,16 @@ const isThisWeek = iso => {
 export default function StartPage({ user }) {
   const [stats, setStats] = useState({ members: null, week: null, attending: null, tfa: null })
   const [events, setEvents] = useState([])
+  const [currentEvent, setCurrentEvent] = useState(null)
   const [attendees, setAttendees] = useState([])
+  const [cancelled, setCancelled] = useState([])
   const [counts, setCounts] = useState({})
   const [err, setErr] = useState(null)
+  const [today] = useState(() => {
+    const date = new Date()
+    date.setHours(0, 0, 0, 0)
+    return date
+  })
 
   useEffect(() => {
     const auth = sessionStorage.getItem('fenix_auth')
@@ -53,7 +60,7 @@ export default function StartPage({ user }) {
         const memberCount = Number(usersRes.headers.get('X-WP-Total')) || 0
 
         // Events ascending by ACF date (client-side sort since meta isn't queryable)
-        const evRes = await fetch(`${API}/event?per_page=20&_embed=1`, { headers })
+        const evRes = await fetch(`${API}/event?per_page=100&_embed=1`, { headers })
         const evs = await evRes.json()
         evs.sort((a, b) => {
           const da = parseAcfDate(a.acf?.event_date)
@@ -83,20 +90,21 @@ export default function StartPage({ user }) {
 
         // Signup counts and attendees come from the custom signup summary endpoint
         const summary = await fetchEventSignupSummary(auth)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
         const next = evs.find(e => {
           const d = parseAcfDate(e.acf?.event_date)
           return d && d >= today
         }) ?? null
 
         const people = next ? (summary.attendees?.[next.id] ?? []) : []
+        const cancelledPeople = next ? (summary.cancelled?.[next.id] ?? []) : []
         const nextCount = next ? Number(summary.counts[next.id]) || 0 : 0
 
         if (!live) return
         setEvents(evs)
+        setCurrentEvent(next)
         setCounts(summary.counts)
         setAttendees(people)
+        setCancelled(cancelledPeople)
         setStats({
           members: memberCount,
           week: evs.filter(e => isThisWeek(e.acf?.event_date)).length,
@@ -110,7 +118,62 @@ export default function StartPage({ user }) {
 
     load()
     return () => { live = false }
-  }, [])
+  }, [today])
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+
+  const printSignupList = () => {
+    if (!currentEvent) return
+
+    const title = currentEvent.title?.rendered?.replace(/<[^>]*>/g, '') || 'Event'
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      setErr('Utskriftsfönstret kunde inte öppnas. Tillåt popup-fönster och försök igen.')
+      return
+    }
+
+    const attendeeRows = attendees.map(person => `
+      <tr><td>${escapeHtml(person.name)}</td><td>Anmäld</td><td>${escapeHtml(person.signup_date)}</td></tr>
+    `).join('')
+    const cancelledRows = cancelled.map(person => `
+      <tr><td>${escapeHtml(person.name)}</td><td>Avanmäld</td><td>${escapeHtml(person.cancelled_at)}</td></tr>
+    `).join('')
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="sv">
+        <head>
+          <meta charset="utf-8">
+          <title>${escapeHtml(title)} - deltagarlista</title>
+          <style>
+            body { font: 14px Arial, sans-serif; color: #222; margin: 32px; }
+            h1 { margin: 0 0 8px; }
+            .date { color: #555; margin-bottom: 24px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: left; }
+            th { background: #f0f2f3; }
+            @media print { body { margin: 15mm; } }
+          </style>
+        </head>
+        <body>
+          <h1>${escapeHtml(title)}</h1>
+          <div class="date">${escapeHtml(fmtDate(currentEvent.acf?.event_date))}</div>
+          <table>
+            <thead><tr><th>Namn</th><th>Status</th><th>Datum</th></tr></thead>
+            <tbody>${attendeeRows}${cancelledRows}</tbody>
+          </table>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
+    window.setTimeout(() => printWindow.print(), 250)
+  }
 
   const cards = [
     { label: 'Medlemmar totalt', value: stats.members },
@@ -118,6 +181,10 @@ export default function StartPage({ user }) {
     { label: 'Kommande', value: stats.attending },
     { label: 'TFA totalt', value: stats.tfa !== null ? fmtKr(stats.tfa) : null },
   ]
+  const upcomingEvents = events.filter(event => {
+    const date = parseAcfDate(event.acf?.event_date)
+    return date && date >= today
+  })
 
   return (
     <div className="startpage">
@@ -140,9 +207,9 @@ export default function StartPage({ user }) {
       <div className="sp-grid">
         <section className="sp-panel">
           <h2>Kommande event</h2>
-          {events.length === 0 && <p className="muted">Inga kommande event.</p>}
+          {upcomingEvents.length === 0 && <p className="muted">Inga kommande event.</p>}
           <ul className="event-list">
-            {events.slice(0, 5).map(ev => (
+            {upcomingEvents.slice(0, 5).map(ev => (
               <li key={ev.id}>
                 <div>
                   <strong className="ev-title" dangerouslySetInnerHTML={{ __html: ev.title?.rendered ?? '' }} />
@@ -161,23 +228,47 @@ export default function StartPage({ user }) {
         </section>
 
         <section className="sp-panel">
-          <h2>Kommer nästa event</h2>
-          {attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
-          <ul className="member-list">
-            {attendees.map(m => (
-              <li key={m.id}>
-                {m.avatar_url && (
-                  <img
-                    className="avatar"
-                    src={m.avatar_url}
-                    alt=""
-                    onError={e => { e.target.style.display = 'none' }}
-                  />
-                )}
-                <span>{m.name}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="signup-panel-header">
+            <div>
+              <h2>{currentEvent ? `Deltagare: ${currentEvent.title?.rendered?.replace(/<[^>]*>/g, '')}` : 'Deltagare'}</h2>
+              {currentEvent && <p className="ev-meta">{fmtDate(currentEvent.acf?.event_date)}</p>}
+            </div>
+            {currentEvent && (
+              <button className="download-signups" type="button" onClick={printSignupList}>
+                Skriv ut / spara som PDF
+              </button>
+            )}
+          </div>
+          {!currentEvent && <p className="muted">Inga kommande event.</p>}
+          {currentEvent && attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
+          {attendees.length > 0 && (
+            <>
+              <h3 className="signup-list-heading">Anmälda ({attendees.length})</h3>
+              <ul className="member-list">
+                {attendees.map(m => (
+                  <li key={m.id}>
+                    {m.avatar_url && (
+                      <img
+                        className="avatar"
+                        src={m.avatar_url}
+                        alt=""
+                        onError={e => { e.target.style.display = 'none' }}
+                      />
+                    )}
+                    <span>{m.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {cancelled.length > 0 && (
+            <>
+              <h3 className="signup-list-heading cancelled-heading">Avanmälda ({cancelled.length})</h3>
+              <ul className="member-list cancelled-list">
+                {cancelled.map(m => <li key={m.id}>{m.name}</li>)}
+              </ul>
+            </>
+          )}
         </section>
       </div>
     </div>
