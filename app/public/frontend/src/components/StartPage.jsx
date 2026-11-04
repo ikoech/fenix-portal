@@ -62,13 +62,21 @@ export default function StartPage({ user }) {
         })
 
         // TFA total sum deal_amount across all pages
-        let tfa = 0, page = 1, more = true
-        while (more) {
-          const res = await fetch(`${API}/tfa?per_page=100&page=${page}`, { headers })
-          const rows = await res.json()
-          tfa += rows.reduce((s, r) => s + (Number(r.acf?.deal_amount) || 0), 0)
-          more = Number(res.headers.get('X-WP-TotalPages')) > page
-          page += 1
+        let tfa = 0, page = 1
+        for (;;) {
+        const res = await fetch(`${API}/tfa?per_page=100&page=${page}`, { headers })
+        if (!res.ok) break
+        const rows = await res.json()
+        if (!Array.isArray(rows) || rows.length === 0) break
+        tfa += rows.reduce((s, r) => {
+            const raw = r.acf?.deal_amount
+            if (raw == null) return s
+            // Strip commas, spaces, and other non-digits except decimal point
+            const num = Number(String(raw).replace(/[^0-9.]/g, ''))
+            return s + (isNaN(num) ? 0 : num)
+        }, 0)
+        if (rows.length < 100) break
+        page += 1
         }
 
         // Attendees of next event supports acf.attendees or acf.rsvps as IDs or objects
