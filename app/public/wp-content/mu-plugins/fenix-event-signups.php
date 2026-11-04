@@ -167,17 +167,42 @@ function fenix_get_event_signup_summary() {
 	);
 	$counts     = array();
 	$mine       = array();
+	$attendees  = array();
+	$seen       = array();
+	$members    = array();
 	$user_id    = get_current_user_id();
 
 	foreach ( $signup_ids as $signup_id ) {
-		$event_id = absint( get_post_meta( $signup_id, 'event_id', true ) );
+		$event_id  = absint( get_post_meta( $signup_id, 'event_id', true ) );
+		$member_id = absint( get_post_meta( $signup_id, 'member_id', true ) );
 		if ( ! $event_id ) {
 			continue;
 		}
 
 		$counts[ $event_id ] = isset( $counts[ $event_id ] ) ? $counts[ $event_id ] + 1 : 1;
-		if ( absint( get_post_meta( $signup_id, 'member_id', true ) ) === $user_id ) {
+		if ( $member_id === $user_id ) {
 			$mine[ $event_id ] = (int) $signup_id;
+		}
+
+		if ( ! $member_id || isset( $seen[ $event_id ][ $member_id ] ) ) {
+			continue;
+		}
+		$seen[ $event_id ][ $member_id ] = true;
+
+		if ( ! array_key_exists( $member_id, $members ) ) {
+			$members[ $member_id ] = null;
+			if ( get_userdata( $member_id ) ) {
+				$profile               = fenix_get_public_member_profile_data( $member_id );
+				$members[ $member_id ] = array(
+					'id'         => $profile['id'],
+					'name'       => $profile['name'],
+					'avatar_url' => $profile['acf']['photo'],
+				);
+			}
+		}
+
+		if ( $members[ $member_id ] ) {
+			$attendees[ $event_id ][] = $members[ $member_id ];
 		}
 	}
 
@@ -185,6 +210,7 @@ function fenix_get_event_signup_summary() {
 		array(
 			'counts'    => $counts,
 			'signupIds' => $mine,
+			'attendees' => (object) $attendees,
 		)
 	);
 }

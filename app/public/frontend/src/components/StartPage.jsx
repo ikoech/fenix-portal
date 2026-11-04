@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { fetchEventSignupSummary } from '../api/events'
 import '../css/StartPage.css'
 
 const API = 'http://fenix-portal.local/wp-json/wp/v2'
@@ -37,6 +38,7 @@ export default function StartPage({ user }) {
   const [stats, setStats] = useState({ members: null, week: null, attending: null, tfa: null })
   const [events, setEvents] = useState([])
   const [attendees, setAttendees] = useState([])
+  const [counts, setCounts] = useState({})
   const [err, setErr] = useState(null)
 
   useEffect(() => {
@@ -79,34 +81,26 @@ export default function StartPage({ user }) {
         page += 1
         }
 
-        // Attendees of next event supports acf.attendees or acf.rsvps as IDs or objects
+        // Signup counts and attendees come from the custom signup summary endpoint
+        const summary = await fetchEventSignupSummary(auth)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         const next = evs.find(e => {
           const d = parseAcfDate(e.acf?.event_date)
           return d && d >= today
-        }) ?? evs[0]
+        }) ?? null
 
-        let people = []
-        const raw = next?.acf?.attendees ?? next?.acf?.rsvps ?? []
-        if (raw.length) {
-          if (typeof raw[0] === 'object') {
-            people = raw.map(u => ({ id: u.id, name: u.name, avatar_url: u.avatar_url }))
-          } else {
-            const uRes = await fetch(`${API}/users?include=${raw.join(',')}&per_page=100`, { headers })
-            people = (await uRes.json()).map(u => ({
-              id: u.id, name: u.name, avatar_url: u.acf?.avatar_url,
-            }))
-          }
-        }
+        const people = next ? (summary.attendees?.[next.id] ?? []) : []
+        const nextCount = next ? Number(summary.counts[next.id]) || 0 : 0
 
         if (!live) return
         setEvents(evs)
+        setCounts(summary.counts)
         setAttendees(people)
         setStats({
           members: memberCount,
           week: evs.filter(e => isThisWeek(e.acf?.event_date)).length,
-          attending: people.length,
+          attending: nextCount,
           tfa,
         })
       } catch (e) {
@@ -159,7 +153,7 @@ export default function StartPage({ user }) {
                   </small>
                 </div>
                 <span className="pill">
-                  {(ev.acf?.attendees?.length ?? ev.acf?.rsvps?.length ?? 0)}                   deltagare
+                  {Number(counts[ev.id]) || 0} deltagare
                 </span>
               </li>
             ))}
@@ -172,12 +166,14 @@ export default function StartPage({ user }) {
           <ul className="member-list">
             {attendees.map(m => (
               <li key={m.id}>
-                <img
-                  className="avatar"
-                  src={m.avatar_url}
-                  alt=""
-                  onError={e => { e.target.style.display = 'none' }}
-                />
+                {m.avatar_url && (
+                  <img
+                    className="avatar"
+                    src={m.avatar_url}
+                    alt=""
+                    onError={e => { e.target.style.display = 'none' }}
+                  />
+                )}
                 <span>{m.name}</span>
               </li>
             ))}
