@@ -49,7 +49,7 @@ function EventsTab({ user, onRequireLogin }) {
         const sorted = [...data].sort((a, b) => {
           const da = a.acf?.event_date || ''
           const db = b.acf?.event_date || ''
-          return da.localeCompare(db) // YYYYMMDD strings sort correctly
+          return db.localeCompare(da) // YYYYMMDD strings sort correctly
         })
         if (!isCurrent) return
         setEvents(sorted)
@@ -159,7 +159,7 @@ function EventsTab({ user, onRequireLogin }) {
       // Reload events (sorted)
       const updated = await fetchEvents()
       setEvents([...updated].sort((a, b) =>
-        (a.acf?.event_date || '').localeCompare(b.acf?.event_date || '')
+        (b.acf?.event_date || '').localeCompare(a.acf?.event_date || '')
       ))
     } catch (err) {
       setFormMessage('Creation failed: ' + err.message)

@@ -100,7 +100,7 @@ export default function StartPage({ user }) {
         const nextCount = next ? Number(summary.counts[next.id]) || 0 : 0
 
         if (!live) return
-        setEvents(evs)
+        setEvents([...evs].reverse())
         setCurrentEvent(next)
         setCounts(summary.counts)
         setAttendees(people)
