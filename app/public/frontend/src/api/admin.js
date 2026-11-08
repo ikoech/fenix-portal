@@ -1,4 +1,4 @@
-const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
+import { WP_API as API_BASE } from './config'
 
 export async function fetchAllWithCount(endpoint, authHeader) {
   const res = await fetch(`${API_BASE}/${endpoint}?per_page=100`, {

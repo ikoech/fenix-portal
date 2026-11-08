@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react'
-import { fetchEventSignupSummary } from '../api/events'
+import { fetchEvents, fetchEventSignupSummary } from '../api/events'
+import { WP_API as API } from '../api/config'
+import { parseEventDate as parseAcfDate, selectNextEvent, buildRosterPrintHtml } from '../utils/eventRoster'
 import '../css/StartPage.css'
-
-const API = 'http://fenix-portal.local/wp-json/wp/v2'
 
 const fmtKr = n => new Intl.NumberFormat('sv-SE').format(n) + ' kr'
 
-/** ACF date picker returns compact "Ymd" e.g. "20261103" → parse manually */
-function parseAcfDate(ymd) {
-  if (!ymd || typeof ymd !== 'string') return null
-  const clean = ymd.replace(/[^0-9]/g, '')
-  if (clean.length < 8) return null
-  const y = +clean.slice(0, 4), m = +clean.slice(4, 6) - 1, d = +clean.slice(6, 8)
-  const dt = new Date(y, m, d)
-  return isNaN(dt) ? null : dt
-}
 /** Format ACF date to string */
 const fmtDate = iso => {
   const d = parseAcfDate(iso)
@@ -41,7 +32,9 @@ export default function StartPage({ user }) {
   const [attendees, setAttendees] = useState([])
   const [cancelled, setCancelled] = useState([])
   const [counts, setCounts] = useState({})
+  const [breakdown, setBreakdown] = useState({})
   const [err, setErr] = useState(null)
+  const [loaded, setLoaded] = useState(false)
   const [today] = useState(() => {
     const date = new Date()
     date.setHours(0, 0, 0, 0)
@@ -60,8 +53,7 @@ export default function StartPage({ user }) {
         const memberCount = Number(usersRes.headers.get('X-WP-Total')) || 0
 
         // Events ascending by ACF date (client-side sort since meta isn't queryable)
-        const evRes = await fetch(`${API}/event?per_page=100&_embed=1`, { headers })
-        const evs = await evRes.json()
+        const evs = await fetchEvents()
         evs.sort((a, b) => {
           const da = parseAcfDate(a.acf?.event_date)
           const db = parseAcfDate(b.acf?.event_date)
@@ -90,10 +82,7 @@ export default function StartPage({ user }) {
 
         // Signup counts and attendees come from the custom signup summary endpoint
         const summary = await fetchEventSignupSummary(auth)
-        const next = evs.find(e => {
-          const d = parseAcfDate(e.acf?.event_date)
-          return d && d >= today
-        }) ?? null
+        const next = selectNextEvent(evs, today)
 
         const people = next ? (summary.attendees?.[next.id] ?? []) : []
         const cancelledPeople = next ? (summary.cancelled?.[next.id] ?? []) : []
@@ -103,6 +92,7 @@ export default function StartPage({ user }) {
         setEvents([...evs].reverse())
         setCurrentEvent(next)
         setCounts(summary.counts)
+        setBreakdown(summary.breakdown)
         setAttendees(people)
         setCancelled(cancelledPeople)
         setStats({
@@ -111,6 +101,7 @@ export default function StartPage({ user }) {
           attending: nextCount,
           tfa,
         })
+        setLoaded(true)
       } catch (e) {
         if (live) setErr(e.message)
       }
@@ -120,59 +111,30 @@ export default function StartPage({ user }) {
     return () => { live = false }
   }, [today])
 
-  const escapeHtml = value => String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-
-  const printSignupList = () => {
+  const printSignupList = async () => {
     if (!currentEvent) return
 
-    const title = currentEvent.title?.rendered?.replace(/<[^>]*>/g, '') || 'Event'
+    const titleDocument = new DOMParser().parseFromString(currentEvent.title?.rendered || 'Event', 'text/html')
+    const title = titleDocument.documentElement.textContent || 'Event'
     const printWindow = window.open('', '_blank')
     if (!printWindow) {
       setErr('Utskriftsfönstret kunde inte öppnas. Tillåt popup-fönster och försök igen.')
       return
     }
 
-    const attendeeRows = attendees.map(person => `
-      <tr><td>${escapeHtml(person.name)}</td><td>Anmäld</td><td>${escapeHtml(person.signup_date)}</td></tr>
-    `).join('')
-    const cancelledRows = cancelled.map(person => `
-      <tr><td>${escapeHtml(person.name)}</td><td>Avanmäld</td><td>${escapeHtml(person.cancelled_at)}</td></tr>
-    `).join('')
-
-    printWindow.document.write(`
-      <!doctype html>
-      <html lang="sv">
-        <head>
-          <meta charset="utf-8">
-          <title>${escapeHtml(title)} - deltagarlista</title>
-          <style>
-            body { font: 14px Arial, sans-serif; color: #222; margin: 32px; }
-            h1 { margin: 0 0 8px; }
-            .date { color: #555; margin-bottom: 24px; }
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: left; }
-            th { background: #f0f2f3; }
-            @media print { body { margin: 15mm; } }
-          </style>
-        </head>
-        <body>
-          <h1>${escapeHtml(title)}</h1>
-          <div class="date">${escapeHtml(fmtDate(currentEvent.acf?.event_date))}</div>
-          <table>
-            <thead><tr><th>Namn</th><th>Status</th><th>Datum</th></tr></thead>
-            <tbody>${attendeeRows}${cancelledRows}</tbody>
-          </table>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-    printWindow.focus()
-    window.setTimeout(() => printWindow.print(), 250)
+    try {
+      const summary = await fetchEventSignupSummary(sessionStorage.getItem('fenix_auth'))
+      const eventDate = parseAcfDate(currentEvent.acf?.event_date)
+      const printDate = eventDate ? eventDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Inget datum'
+      printWindow.document.write(buildRosterPrintHtml(title, printDate,
+        summary.attendees[currentEvent.id] || [], summary.cancelled[currentEvent.id] || []))
+      printWindow.document.close()
+      printWindow.focus()
+      window.setTimeout(() => printWindow.print(), 250)
+    } catch (e) {
+      printWindow.close()
+      setErr(e.message)
+    }
   }
 
   const cards = [
@@ -207,7 +169,7 @@ export default function StartPage({ user }) {
       <div className="sp-grid">
         <section className="sp-panel">
           <h2>Kommande event</h2>
-          {upcomingEvents.length === 0 && <p className="muted">Inga kommande event.</p>}
+          {loaded && upcomingEvents.length === 0 && <p className="muted">Inga kommande event.</p>}
           <ul className="event-list">
             {upcomingEvents.slice(0, 5).map(ev => (
               <li key={ev.id}>
@@ -239,14 +201,17 @@ export default function StartPage({ user }) {
               </button>
             )}
           </div>
-          {!currentEvent && <p className="muted">Inga kommande event.</p>}
+          {loaded && !currentEvent && <p className="muted">Inga kommande event.</p>}
+          {currentEvent && <p className="ev-meta">
+            {attendees.length} deltagare · {breakdown[currentEvent.id]?.members || 0} medlemmar, {breakdown[currentEvent.id]?.guests || 0} gäster
+          </p>}
           {currentEvent && attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
           {attendees.length > 0 && (
             <>
               <h3 className="signup-list-heading">Anmälda ({attendees.length})</h3>
               <ul className="member-list">
                 {attendees.map(m => (
-                  <li key={m.id}>
+                  <li key={`${m.signup_id}-${m.type}-${m.id}`}>
                     {m.avatar_url && (
                       <img
                         className="avatar"
@@ -255,7 +220,7 @@ export default function StartPage({ user }) {
                         onError={e => { e.target.style.display = 'none' }}
                       />
                     )}
-                    <span>{m.name}</span>
+                    <span>{m.name}<small className="roster-type">{m.type === 'guest' ? `Gäst inbjuden av ${m.inviter_name}` : 'Medlem'}</small></span>
                   </li>
                 ))}
               </ul>
@@ -265,7 +230,7 @@ export default function StartPage({ user }) {
             <>
               <h3 className="signup-list-heading cancelled-heading">Avanmälda ({cancelled.length})</h3>
               <ul className="member-list cancelled-list">
-                {cancelled.map(m => <li key={m.id}>{m.name}</li>)}
+                {cancelled.map(m => <li key={`${m.signup_id}-${m.type}-${m.id}`}>{m.name}{m.type === 'guest' ? ` · Gäst inbjuden av ${m.inviter_name}` : ' · Medlem'}</li>)}
               </ul>
             </>
           )}

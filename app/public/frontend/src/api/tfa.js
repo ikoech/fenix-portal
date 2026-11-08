@@ -1,4 +1,4 @@
-const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
+import { WP_API as API_BASE } from './config'
 // Fetch TFA deals from the API
 export async function fetchTFADeals(authHeader) {
   const res = await fetch(`${API_BASE}/tfa?per_page=100&_embed`, {

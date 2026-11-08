@@ -347,3 +347,10 @@
 }
 
 .btn-signup:disabled { opacity: 0.6; cursor: wait; }
+
+.event-guests { margin-top: 10px; font-size: 13px; }
+.event-guests ul { list-style: none; padding: 0; margin: 6px 0; }
+.event-guests li { display: flex; gap: 12px; align-items: center; padding: 3px 0; }
+.event-guests form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.event-guests input { padding: 7px; border: 1px solid #ccc; border-radius: 4px; }
+.event-guests .btn-signup { margin-top: 0; }

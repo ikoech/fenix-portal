@@ -86,6 +86,7 @@
 .pill{margin-left:auto;flex:0 0 auto;background:rgba(15,139,141,.12);color:#0f8b8d;border-radius:999px;padding:.15rem .6rem;font-size:.8rem;white-space:nowrap}
 .member-list li{display:flex;align-items:center;gap:.6rem;padding:.45rem 0}
 .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#dfe7e9}
+.roster-type{display:block;color:#6b7c81;font-size:.78rem}
 .muted{color:#8a979b}
 
 /* Public gate white card on the same background */

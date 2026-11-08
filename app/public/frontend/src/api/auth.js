@@ -1,5 +1,4 @@
-const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
-const JWT_API_BASE = 'http://fenix-portal.local/wp-json/jwt-auth/v1'
+import { WP_API as API_BASE, JWT_API as JWT_API_BASE } from './config'
 
 export function getAuthHeader(token) {
   return `Bearer ${token}`

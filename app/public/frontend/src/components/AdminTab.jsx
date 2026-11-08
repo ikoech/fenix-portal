@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { updateEvent, deleteEvent } from '../api/admin'
 import { updateMember, deleteMember } from '../api/members'
+import { WP_API, FENIX_API } from '../api/config'
 import '../css/AdminTab.css'
 
 function AdminTab({ user }) {
@@ -43,12 +44,12 @@ function AdminTab({ user }) {
       const headers = { 'Authorization': authHeader }
 
       const [membersRes, eventsRes, signupsRes, tfaRes, seekingRes, docsRes] = await Promise.all([
-        fetch('http://fenix-portal.local/wp-json/wp/v2/users', { headers }),
-        fetch('http://fenix-portal.local/wp-json/wp/v2/event', { headers }),
-        fetch('http://fenix-portal.local/wp-json/wp/v2/event-signups', { headers }),
-        fetch('http://fenix-portal.local/wp-json/wp/v2/tfa', { headers }),
-        fetch('http://fenix-portal.local/wp-json/wp/v2/seeking', { headers }),
-        fetch('http://fenix-portal.local/wp-json/wp/v2/documents', { headers })
+        fetch(`${WP_API}/users`, { headers }),
+        fetch(`${WP_API}/event`, { headers }),
+        fetch(`${WP_API}/event-signups`, { headers }),
+        fetch(`${WP_API}/tfa`, { headers }),
+        fetch(`${WP_API}/seeking`, { headers }),
+        fetch(`${WP_API}/documents`, { headers })
       ])
       // Check for errors in responses
       const membersData = await membersRes.json()
@@ -184,7 +185,7 @@ function AdminTab({ user }) {
 
     setIsAddingMember(true)
     try {
-      const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/users', {
+      const res = await fetch(`${WP_API}/users`, {
         method: 'POST',
         headers: {
           'Authorization': authHeader,
@@ -223,7 +224,7 @@ function AdminTab({ user }) {
       // Now update the ACF fields for the new member
       let profile
       try {
-        const profileRes = await fetch(`http://fenix-portal.local/wp-json/fenix/v1/users/${created.id}`, {
+        const profileRes = await fetch(`${FENIX_API}/users/${created.id}`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,

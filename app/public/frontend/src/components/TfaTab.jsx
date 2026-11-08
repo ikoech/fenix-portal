@@ -3,7 +3,7 @@ import { fetchTFADeals, createTFADeal } from '../api/tfa'
 import { formatACFDate } from '../utils/date'
 import '../css/TfaTab.css'
 
-const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
+import { WP_API as API_BASE } from '../api/config'
 
 const parseAmount = value => {
   const digits = String(value ?? '').replace(/\D/g, '')

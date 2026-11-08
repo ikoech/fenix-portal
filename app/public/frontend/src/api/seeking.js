@@ -1,4 +1,4 @@
-const API_BASE = 'http://fenix-portal.local/wp-json/wp/v2'
+import { WP_API as API_BASE } from './config'
 
 export async function fetchSeekingPosts() {
   const res = await fetch(`${API_BASE}/seeking`)

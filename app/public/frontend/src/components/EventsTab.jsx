@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchEvents, fetchEventSignupSummary, createEventSignup, deleteEventSignup } from '../api/events'
+import { fetchEvents, fetchEventSignupSummary, createEventSignup, deleteEventSignup, addEventGuest, removeEventGuest } from '../api/events'
+import { WP_API } from '../api/config'
 import { formatACFDate } from '../utils/date'
 import '../css/EventsTab.css'
 
@@ -9,6 +10,9 @@ function EventsTab({ user, onRequireLogin }) {
   const [search, setSearch] = useState('')
   const [signups, setSignups] = useState({})
   const [signupCounts, setSignupCounts] = useState({})
+  const [breakdown, setBreakdown] = useState({})
+  const [attendees, setAttendees] = useState({})
+  const [guestNames, setGuestNames] = useState({})
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [busy, setBusy] = useState(null)
@@ -57,6 +61,8 @@ function EventsTab({ user, onRequireLogin }) {
         if (!user) {
           setSignups({})
           setSignupCounts({})
+          setBreakdown({})
+          setAttendees({})
           return
         }
 
@@ -64,6 +70,8 @@ function EventsTab({ user, onRequireLogin }) {
         if (!isCurrent) return
         setSignups(summary.signupIds)
         setSignupCounts(summary.counts)
+        setBreakdown(summary.breakdown)
+        setAttendees(summary.attendees)
       } catch (err) {
         if (isCurrent) setError(err.message)
       }
@@ -72,6 +80,14 @@ function EventsTab({ user, onRequireLogin }) {
     loadEvents()
     return () => { isCurrent = false }
   }, [user])
+
+  const refreshSignups = async auth => {
+    const summary = await fetchEventSignupSummary(auth)
+    setSignups(summary.signupIds)
+    setSignupCounts(summary.counts)
+    setBreakdown(summary.breakdown)
+    setAttendees(summary.attendees)
+  }
 
   // Handle user signing up for an event
   const handleSignup = async (eventId) => {
@@ -83,9 +99,8 @@ function EventsTab({ user, onRequireLogin }) {
     setError(null)
     try {
       const authHeader = sessionStorage.getItem('fenix_auth')
-      const signup = await createEventSignup(authHeader, eventId)
-      setSignups(prev => ({ ...prev, [eventId]: signup.id }))
-      setSignupCounts(prev => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }))
+      await createEventSignup(authHeader, eventId)
+      await refreshSignups(authHeader)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -106,8 +121,29 @@ function EventsTab({ user, onRequireLogin }) {
       const authHeader = sessionStorage.getItem('fenix_auth')
       await deleteEventSignup(authHeader, signups[eventId])
 
-      setSignups(prev => { const copy = { ...prev }; delete copy[eventId]; return copy })
-      setSignupCounts(prev => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }))
+      await refreshSignups(authHeader)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const handleGuest = async (eventId, guestId) => {
+    if (busy !== null) return
+    const name = (guestNames[eventId] || '').trim()
+    if (!guestId && !name) {
+      setError('Ange ett gästnamn.')
+      return
+    }
+    setBusy(eventId)
+    setError(null)
+    try {
+      const auth = sessionStorage.getItem('fenix_auth')
+      if (guestId) await removeEventGuest(auth, signups[eventId], guestId)
+      else await addEventGuest(auth, signups[eventId], name)
+      setGuestNames(prev => ({ ...prev, [eventId]: '' }))
+      await refreshSignups(auth)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -127,7 +163,7 @@ function EventsTab({ user, onRequireLogin }) {
     try {
       const authHeader = sessionStorage.getItem('fenix_auth')
       const formattedDate = newDate.replace(/-/g, '') // "2026-12-01" → "20261201"
-      const res = await fetch('http://fenix-portal.local/wp-json/wp/v2/event', {
+      const res = await fetch(`${WP_API}/event`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -262,8 +298,10 @@ function EventsTab({ user, onRequireLogin }) {
             const dateParts = getDateParts(event.acf?.event_date)
             const isSignedUp = signups[event.id]
             const currentCount = signupCounts[event.id] || 0
+            const eventBreakdown = breakdown[event.id] || { members: 0, guests: 0 }
+            const myGuests = (attendees[event.id] || []).filter(person => person.type === 'guest' && person.signup_id === isSignedUp)
             const maxNum = parseInt(event.acf?.max_attendees, 10)
-            const isFull = !isNaN(maxNum) && currentCount >= maxNum
+            const isFull = !isNaN(maxNum) && maxNum > 0 && currentCount >= maxNum
             const location = event.acf?.location || 'TBD'
             const maxAttendees = event.acf?.max_attendees || 'N/A'
             const eventTime = event.acf?.event_time || ''
@@ -294,7 +332,7 @@ function EventsTab({ user, onRequireLogin }) {
                   {eventTime && <p className="event-time">🕐 {eventTime}</p>}
                   <p className="event-location">📍 {location}</p>
                   <p className="event-meta">
-                    Max Attendees: {maxAttendees}{user ? ` (${currentCount} signed up)` : ''}
+                    Max Attendees: {maxAttendees}{user ? ` · ${currentCount} deltagare · ${eventBreakdown.members} medlemmar, ${eventBreakdown.guests} gäster` : ''}
                   </p>
                   <p className="event-full-date">{formatACFDate(event.acf?.event_date)}</p>
 
@@ -326,6 +364,23 @@ function EventsTab({ user, onRequireLogin }) {
                     >
                       {busy === event.id ? 'Signing up…' : 'Sign Up →'}
                     </button>
+                  )}
+                  {user && isSignedUp && (
+                    <div className="event-guests">
+                      <strong>Mina gäster</strong>
+                      {myGuests.length > 0 && <ul>
+                        {myGuests.map(guest => <li key={guest.id}>
+                          <span>{guest.name}</span>
+                          <button type="button" className="btn-cancel-link" disabled={busy !== null} onClick={() => handleGuest(event.id, guest.id)}>Ta bort</button>
+                        </li>)}
+                      </ul>}
+                      <form onSubmit={e => { e.preventDefault(); handleGuest(event.id) }}>
+                        <label htmlFor={`guest-${event.id}`}>Gästnamn</label>
+                        <input id={`guest-${event.id}`} value={guestNames[event.id] || ''} maxLength={200} onChange={e => setGuestNames(prev => ({ ...prev, [event.id]: e.target.value }))} />
+                        <button className="btn-signup" disabled={busy !== null || isFull} type="submit">Lägg till gäst</button>
+                      </form>
+                      {isFull && <small>Eventet är fullbokat.</small>}
+                    </div>
                   )}
                 </div>
               </article>

@@ -1,4 +1,4 @@
-const FENIX_API = 'http://fenix-portal.local/wp-json/fenix/v1'
+import { FENIX_API, WP_API } from './config'
 
 async function readResponse(res, failureMessage) {
   const data = await res.json().catch(() => null)
@@ -54,7 +54,7 @@ export async function updateMember(authHeader, userId, data) {
 export async function deleteMember(authHeader, userId) {
   if (!authHeader) throw new Error('Not logged in — please log in.')
 
-  const res = await fetch(`http://fenix-portal.local/wp-json/wp/v2/users/${userId}?force=true&reassign=false`, {
+  const res = await fetch(`${WP_API}/users/${userId}?force=true&reassign=false`, {
     method: 'DELETE',
     headers: { Authorization: authHeader }
   })

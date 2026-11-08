@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { updateMember } from '../api/members'
 import '../css/ProfileTab.css'
 
-const PROFILE_URL = 'http://fenix-portal.local/wp-json/wp/v2/users/me'
+import { WP_API } from '../api/config'
+const PROFILE_URL = `${WP_API}/users/me`
 
 function copyProfile(profile) {
   return {
