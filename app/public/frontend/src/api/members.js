@@ -1,4 +1,4 @@
-import { FENIX_API, WP_API } from './config'
+import { FENIX_API, WP_API } from './config.js'
 
 async function readResponse(res, failureMessage) {
   const data = await res.json().catch(() => null)

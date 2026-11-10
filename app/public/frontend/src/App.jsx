@@ -12,6 +12,7 @@ import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
 import { fetchUserProfile } from './api/auth'
 import StartPage from './components/StartPage'
+import MemberDirectoryTab from './components/MemberDirectoryTab'
 import './App.css'
 
 function App() {
@@ -99,6 +100,7 @@ function App() {
           <EventsTab user={user} onRequireLogin={() => setShowLogin(true)} />
         )}
         {activeTab === 'members' && <MembersTab />}
+        {user && activeTab === 'directory' && <MemberDirectoryTab />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
         {user && activeTab === 'profile' && <ProfileTab user={user} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}

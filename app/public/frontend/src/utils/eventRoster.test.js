@@ -18,14 +18,20 @@ test('selects earliest future event and never falls back to past or invalid date
 
 test('print roster includes status, attribution and cancellation details with escaped values', () => {
   const html = buildRosterPrintHtml('Event <title>', '8 nov', [
-    { name: 'Member & Co', type: 'member' },
-    { name: '<script>guest</script>', type: 'guest', inviter_name: 'Member "A"' }
-  ], [{ name: 'Past guest', type: 'guest', inviter_name: 'Member', cancelled_at: '2026-11-08', cancelled_by: 'Admin' }])
+    { name: 'Member & Co', type: 'member', email: 'member@example.com', company: 'Member Company' },
+    { name: '<script>guest</script>', type: 'guest', email: 'guest&<tag>@example.com', company: 'Guest Company', status: 'rejected', inviter_name: 'Member "A"' }
+  ], [{ name: 'Past guest', type: 'guest', email: 'past@example.com', inviter_name: 'Member', cancelled_at: '2026-11-08', cancelled_by: 'Admin' }])
   assert.match(html, /Event &lt;title&gt;/)
   assert.match(html, /Member &amp; Co/)
   assert.match(html, /&lt;script&gt;guest&lt;\/script&gt;/)
   assert.doesNotMatch(html, /<script>/)
   assert.match(html, /Member &quot;A&quot;/)
+  assert.match(html, /guest&amp;&lt;tag&gt;@example\.com/)
+  assert.match(html, /past@example\.com/)
+  assert.match(html, /member@example\.com/)
+  assert.match(html, /Member Company/)
+  assert.match(html, /Guest Company/)
+  assert.match(html, /Avvisad/)
   assert.match(html, /Gäst/)
   assert.match(html, /Avanmäld/)
   assert.match(html, /2026-11-08/)

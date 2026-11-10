@@ -1,0 +1,4 @@
+.status-active { color: #1a7f37; }
+.status-cancelled { color: #6b7280; }
+.status-pending { color: #b45309; }
+.status-rejected { color: #b42318; }

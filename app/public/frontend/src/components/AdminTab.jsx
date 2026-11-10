@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { updateEvent, deleteEvent } from '../api/admin'
+import { updateEvent, deleteEvent, getPendingGuests, approveGuest, rejectGuest } from '../api/admin'
 import { updateMember, deleteMember } from '../api/members'
 import { WP_API, FENIX_API } from '../api/config'
+import { formatACFDate } from '../utils/date'
 import '../css/AdminTab.css'
 
 function AdminTab({ user }) {
@@ -29,9 +30,73 @@ function AdminTab({ user }) {
   const [addStatus, setAddStatus] = useState('')
   const [addStatusType, setAddStatusType] = useState('')
   const [isAddingMember, setIsAddingMember] = useState(false)
+  const [pendingGuests, setPendingGuests] = useState([])
+  const [loadingPending, setLoadingPending] = useState(true)
+  const [pendingError, setPendingError] = useState('')
+  const [actionLoading, setActionLoading] = useState(null)
 
   // Check if user is admin
   const isAdmin = user?.id === 1 || user?.roles?.includes('administrator')
+
+  useEffect(() => {
+    if (!isAdmin) return
+    const controller = new AbortController()
+    getPendingGuests(sessionStorage.getItem('fenix_auth'), controller.signal)
+      .then(guests => {
+        if (!controller.signal.aborted) setPendingGuests(guests)
+      })
+      .catch(err => {
+        if (!controller.signal.aborted) {
+          console.error('Kunde inte hämta väntande gäster:', err)
+          setPendingError(`Kunde inte hämta väntande gäster: ${err.message}`)
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadingPending(false)
+      })
+    return () => controller.abort()
+  }, [isAdmin])
+
+  const refreshPendingGuests = async () => {
+    setLoadingPending(true)
+    setPendingError('')
+    try {
+      const guests = await getPendingGuests(sessionStorage.getItem('fenix_auth'))
+      setPendingGuests(guests)
+      return true
+    } catch (err) {
+      console.error('Kunde inte hämta väntande gäster:', err)
+      setPendingError(`Kunde inte hämta väntande gäster: ${err.message}`)
+      return false
+    } finally {
+      setLoadingPending(false)
+    }
+  }
+
+  const handleGuestReview = async (guestId, action) => {
+    if (actionLoading !== null || loadingPending) return
+    const approve = action === 'approve'
+    const confirmation = approve
+      ? 'Godkänn denna gäst? De läggs till i aktivt deltagarantal.'
+      : 'Avvisa denna gäst? De tas bort från väntelistan.'
+    if (!window.confirm(confirmation)) return
+
+    setActionLoading(guestId)
+    setPendingError('')
+    try {
+      const authHeader = sessionStorage.getItem('fenix_auth')
+      if (approve) await approveGuest(authHeader, guestId)
+      else await rejectGuest(authHeader, guestId)
+      setPendingGuests(current => current.filter(guest => guest.id !== guestId))
+      await refreshPendingGuests()
+    } catch (err) {
+      console.error(`Kunde inte ${approve ? 'godkänna' : 'avvisa'} gästen:`, err)
+      const refreshed = await refreshPendingGuests()
+      setPendingError(`Kunde inte ${approve ? 'godkänna' : 'avvisa'} gästen: ${err.message}${refreshed ? '' : ' Gästlistan kunde inte uppdateras.'}`)
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   useEffect(() => {
     if (!isAdmin) return
@@ -622,6 +687,61 @@ function AdminTab({ user }) {
           </form>
         </div>
       )}
+
+      <section className="pending-guests" aria-labelledby="pending-guests-heading">
+        <h2 id="pending-guests-heading">Gäster som väntar på godkännande</h2>
+        {pendingError && (
+          <div className="pending-guests-error" role="alert">
+            <p>{pendingError}</p>
+            <button type="button" onClick={refreshPendingGuests} disabled={loadingPending || actionLoading !== null}>
+              Försök igen
+            </button>
+          </div>
+        )}
+        {loadingPending && <p role="status">Laddar...</p>}
+        {!loadingPending && !pendingError && pendingGuests.length === 0 && (
+          <p className="pending-guests-empty">Inga gäster som väntar på godkännande.</p>
+        )}
+        {pendingGuests.length > 0 && (
+          <div className="pending-guests-table-wrap">
+            <table className="admin-table pending-guests-table">
+              <thead>
+                <tr>
+                  <th scope="col">Namn</th>
+                  <th scope="col">E-post</th>
+                  <th scope="col">Företag</th>
+                  <th scope="col">Inbjuden av</th>
+                  <th scope="col">Möte</th>
+                  <th scope="col">Datum</th>
+                  <th scope="col">Åtgärd</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingGuests.map(guest => (
+                  <tr key={guest.id}>
+                    <td>{guest.name}</td>
+                    <td>{guest.email}</td>
+                    <td>{guest.company || '—'}</td>
+                    <td>{guest.inviter_name}</td>
+                    <td>{guest.event_name} ({formatACFDate(guest.event_date)})</td>
+                    <td>{guest.created_at || '—'}</td>
+                    <td>
+                      <div className="pending-guests-actions">
+                        <button type="button" className="btn-approve" disabled={loadingPending || actionLoading !== null} onClick={() => handleGuestReview(guest.id, 'approve')}>
+                          {actionLoading === guest.id ? 'Väntar...' : 'Godkänn'}
+                        </button>
+                        <button type="button" className="btn-reject" disabled={loadingPending || actionLoading !== null} onClick={() => handleGuestReview(guest.id, 'reject')}>
+                          {actionLoading === guest.id ? 'Väntar...' : 'Avvisa'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </section>
   )
 }

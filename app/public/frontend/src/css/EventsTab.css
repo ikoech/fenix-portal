@@ -60,15 +60,35 @@
 /* --- Event Card --- */
 
 .event-card {
-  display: grid;
-  grid-template-columns: 70px 200px 1fr;
-  gap: 20px;
-  align-items: start;
+  display: block;
   background: #fff;
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 20px;
   transition: box-shadow 0.2s;
+}
+
+.event-card--with-guests {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.event-main {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 200px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  min-width: 0;
+}
+
+.event-card--with-guests .event-main {
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+
+.event-card--with-guests .event-details {
+  grid-column: 2;
 }
 
 .event-card:hover {
@@ -107,7 +127,7 @@
 /* --- Event Image --- */
 
 .event-image-wrap {
-  width: 200px;
+  width: 100%;
   height: 130px;
   overflow: hidden;
   border-radius: 6px;
@@ -139,6 +159,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .event-title {
@@ -203,12 +225,19 @@
 /* --- Responsive --- */
 
 @media (max-width: 768px) {
-  .event-card {
+  .event-card--with-guests,
+  .event-main,
+  .event-card--with-guests .event-main {
     grid-template-columns: 1fr;
+  }
+
+  .event-card--with-guests .event-details {
+    grid-column: auto;
   }
 
   .event-date-badge {
     width: 100%;
+    box-sizing: border-box;
     height: auto;
     flex-direction: row;
     gap: 8px;
@@ -348,9 +377,11 @@
 
 .btn-signup:disabled { opacity: 0.6; cursor: wait; }
 
-.event-guests { margin-top: 10px; font-size: 13px; }
+.event-guests { min-width: 0; font-size: 13px; }
 .event-guests ul { list-style: none; padding: 0; margin: 6px 0; }
 .event-guests li { display: flex; gap: 12px; align-items: center; padding: 3px 0; }
-.event-guests form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.event-guests input { padding: 7px; border: 1px solid #ccc; border-radius: 4px; }
+.event-guests form { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.event-guests input { box-sizing: border-box; width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; }
+.event-guests li span { overflow-wrap: anywhere; }
+.event-guests small { display: block; color: #777; margin-top: 6px; }
 .event-guests .btn-signup { margin-top: 0; }

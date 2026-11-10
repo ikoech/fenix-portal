@@ -95,6 +95,11 @@
   border-bottom: 1px solid #eee;
 }
 
+.profile-table .profile-multiline {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .profile-table a {
   color: #4A7C89;
 }
@@ -136,6 +141,10 @@
 
 .form-group textarea {
   resize: vertical;
+}
+
+.profile-form textarea {
+  font-family: inherit;
 }
 
 .form-actions {

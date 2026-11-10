@@ -131,7 +131,7 @@ add_filter(
 
 		$acf  = isset( $data['acf'] ) && is_array( $data['acf'] ) ? $data['acf'] : array();
 
-		foreach ( array( 'company', 'phone', 'bio', 'interests', 'industry', 'role', 'website', 'linkedin', 'avatar_url' ) as $field ) {
+		foreach ( array( 'company', 'phone', 'bio', 'interests', 'industry', 'role', 'expertise', 'specific_search', 'deputy', 'website', 'linkedin', 'avatar_url' ) as $field ) {
 			$acf[ $field ] = (string) get_user_meta( $user->ID, $field, true );
 		}
 		$acf['photo'] = $acf['avatar_url'];
@@ -188,7 +188,7 @@ function fenix_update_member_profile( WP_REST_Request $request ) {
 		}
 	}
 
-	foreach ( array( 'company', 'phone', 'bio', 'interests', 'industry', 'role', 'avatar_url', 'photo', 'linkedin', 'website' ) as $field ) {
+	foreach ( array( 'company', 'phone', 'bio', 'interests', 'industry', 'role', 	'expertise', 'specific_search', 'deputy', 'avatar_url', 'photo', 'linkedin', 'website' ) as $field ) {
 		if ( array_key_exists( $field, $acf ) && ! is_scalar( $acf[ $field ] ) ) {
 			return new WP_Error(
 				'fenix_invalid_profile_value',
@@ -196,6 +196,34 @@ function fenix_update_member_profile( WP_REST_Request $request ) {
 				array( 'status' => 400 )
 			);
 		}
+	}
+
+		$deputy_length = array_key_exists( 'deputy', $acf ) ? preg_match_all( '/[\s\S]/u', (string) $acf['deputy'] ) : 0;
+	if ( false === $deputy_length || $deputy_length > 200 ) {
+			return new WP_Error(
+				'fenix_invalid_profile_value',
+				'Deputy must be at most 200 characters.',
+				array( 'status' => 400 )
+			);
+		}
+
+	$profile_textareas = array();
+	foreach ( array( 'expertise', 'specific_search' ) as $field ) {
+		if ( ! array_key_exists( $field, $acf ) ) {
+			continue;
+		}
+		$value = str_replace( array( "\r\n", "\r" ), "\n", (string) $acf[ $field ] );
+		// HTML maxlength counts UTF-16 code units, including two for non-BMP characters.
+		$characters = preg_match_all( '/[\s\S]/u', $value );
+		$surrogates = preg_match_all( '/[\x{10000}-\x{10FFFF}]/u', $value );
+		if ( false === $characters || false === $surrogates || $characters + $surrogates > 1000 ) {
+			return new WP_Error(
+				'fenix_invalid_profile_value',
+				sprintf( '%s must contain valid text of at most 1000 characters.', ucfirst( str_replace( '_', ' ', $field ) ) ),
+				array( 'status' => 400 )
+			);
+		}
+		$profile_textareas[ $field ] = sanitize_textarea_field( $value );
 	}
 
 	$update = array( 'ID' => $user_id );
@@ -231,7 +259,7 @@ function fenix_update_member_profile( WP_REST_Request $request ) {
 		}
 	}
 
-	$text_fields = array( 'company', 'phone', 'interests', 'industry', 'role' );
+	$text_fields = array( 'company', 'phone', 'interests', 	'industry', 'role', 'deputy' );
 	foreach ( $text_fields as $field ) {
 		if ( array_key_exists( $field, $acf ) ) {
 			update_user_meta( $user_id, $field, sanitize_text_field( (string) $acf[ $field ] ) );
@@ -241,6 +269,17 @@ function fenix_update_member_profile( WP_REST_Request $request ) {
 	foreach ( array( 'bio' ) as $field ) {
 		if ( array_key_exists( $field, $acf ) ) {
 			update_user_meta( $user_id, $field, sanitize_textarea_field( (string) $acf[ $field ] ) );
+		}
+	}
+
+	foreach ( $profile_textareas as $field => $value ) {
+		update_user_meta( $user_id, $field, wp_slash( $value ) );
+		if ( get_user_meta( $user_id, $field, true ) !== $value ) {
+			return new WP_Error(
+				'fenix_profile_save_failed',
+				sprintf( 'Could not save %s.', str_replace( '_', ' ', $field ) ),
+				array( 'status' => 500 )
+			);
 		}
 	}
 
@@ -271,6 +310,9 @@ function fenix_get_member_profile_data( $user_id ) {
 			'interests',
 			'industry',
 			'role',
+			'expertise',
+			'specific_search',
+			'deputy',
 			'website',
 			'linkedin',
 			'avatar_url',

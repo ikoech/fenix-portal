@@ -78,9 +78,9 @@ async function guestRequest(authHeader, url, options) {
   return data
 }
 
-export function addEventGuest(authHeader, signupId, name) {
+export function addEventGuest(authHeader, signupId, name, email, company = '') {
   return guestRequest(authHeader, `${SIGNUPS_API}/${signupId}/guests`, {
-    method: 'POST', body: JSON.stringify({ name: name.trim() })
+    method: 'POST', body: JSON.stringify({ name: name.trim(), email: email.trim(), company: company.trim() })
   })
 }
 

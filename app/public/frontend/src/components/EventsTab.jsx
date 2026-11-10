@@ -13,6 +13,8 @@ function EventsTab({ user, onRequireLogin }) {
   const [breakdown, setBreakdown] = useState({})
   const [attendees, setAttendees] = useState({})
   const [guestNames, setGuestNames] = useState({})
+  const [guestEmails, setGuestEmails] = useState({})
+  const [guestCompanies, setGuestCompanies] = useState({})
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [busy, setBusy] = useState(null)
@@ -132,8 +134,14 @@ function EventsTab({ user, onRequireLogin }) {
   const handleGuest = async (eventId, guestId) => {
     if (busy !== null) return
     const name = (guestNames[eventId] || '').trim()
+    const email = (guestEmails[eventId] || '').trim()
+    const company = (guestCompanies[eventId] || '').trim()
     if (!guestId && !name) {
       setError('Ange ett gästnamn.')
+      return
+    }
+    if (!guestId && !email) {
+      setError('Ange gästens e-postadress.')
       return
     }
     setBusy(eventId)
@@ -141,8 +149,12 @@ function EventsTab({ user, onRequireLogin }) {
     try {
       const auth = sessionStorage.getItem('fenix_auth')
       if (guestId) await removeEventGuest(auth, signups[eventId], guestId)
-      else await addEventGuest(auth, signups[eventId], name)
-      setGuestNames(prev => ({ ...prev, [eventId]: '' }))
+      else {
+        await addEventGuest(auth, signups[eventId], name, email, company)
+        setGuestNames(prev => ({ ...prev, [eventId]: '' }))
+        setGuestEmails(prev => ({ ...prev, [eventId]: '' }))
+        setGuestCompanies(prev => ({ ...prev, [eventId]: '' }))
+      }
       await refreshSignups(auth)
     } catch (err) {
       setError(err.message)
@@ -308,81 +320,87 @@ function EventsTab({ user, onRequireLogin }) {
             const imageUrl = event.acf?.image_url || null
 
             return (
-              <article key={event.id} className="event-card">
-                <div className="event-date-badge">
-                  <span className="event-day">{dateParts.day}</span>
-                  <span className="event-month">{dateParts.month}</span>
-                </div>
+              <article key={event.id} className={`event-card${user && isSignedUp ? ' event-card--with-guests' : ''}`}>
+                <div className="event-main">
+                  <div className="event-date-badge">
+                    <span className="event-day">{dateParts.day}</span>
+                    <span className="event-month">{dateParts.month}</span>
+                  </div>
 
-                <div className="event-image-wrap">
-                  {imageUrl ? (
-                    <img src={imageUrl} alt={event.title.rendered} className="event-image" />
-                  ) : (
-                    <div className="event-image-placeholder">
-                      <span>FENIX</span>
-                    </div>
-                  )}
-                </div>
+                  <div className="event-image-wrap">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt={event.title.rendered} className="event-image" />
+                    ) : (
+                      <div className="event-image-placeholder">
+                        <span>FENIX</span>
+                      </div>
+                    )}
+                  </div>
 
-                <div className="event-details">
-                  <h3 className="event-title">{event.title.rendered}</h3>
-                  {event.acf?.description && (
-                    <p className="event-description">{event.acf.description}</p>
-                  )}
-                  {eventTime && <p className="event-time">🕐 {eventTime}</p>}
-                  <p className="event-location">📍 {location}</p>
-                  <p className="event-meta">
-                    Max Attendees: {maxAttendees}{user ? ` · ${currentCount} deltagare · ${eventBreakdown.members} medlemmar, ${eventBreakdown.guests} gäster` : ''}
-                  </p>
-                  <p className="event-full-date">{formatACFDate(event.acf?.event_date)}</p>
+                  <div className="event-details">
+                    <h3 className="event-title">{event.title.rendered}</h3>
+                    {event.acf?.description && (
+                      <p className="event-description">{event.acf.description}</p>
+                    )}
+                    {eventTime && <p className="event-time">🕐 {eventTime}</p>}
+                    <p className="event-location">📍 {location}</p>
+                    <p className="event-meta">
+                      Max Attendees: {maxAttendees}{user ? ` · ${currentCount} deltagare · ${eventBreakdown.members} medlemmar, ${eventBreakdown.guests} gäster` : ''}
+                    </p>
+                    <p className="event-full-date">{formatACFDate(event.acf?.event_date)}</p>
 
-                  {user && isSignedUp ? (
-                    <div className="signed-up-row">
-                      <span className="signed-up-badge">✓ Signed Up</span>
+                    {user && isSignedUp ? (
+                      <div className="signed-up-row">
+                        <span className="signed-up-badge">✓ Signed Up</span>
+                        <button
+                          className="btn-cancel-link"
+                          disabled={busy === event.id}
+                          onClick={() => handleCancelSignup(event.id)}
+                        >
+                          {busy === event.id ? 'Cancelling…' : 'Cancel'}
+                        </button>
+                      </div>
+                    ) : isFull ? (
+                      <span className="event-full-badge">Event Full</span>
+                    ) : !user ? (
                       <button
-                        className="btn-cancel-link"
-                        disabled={busy === event.id}
-                        onClick={() => handleCancelSignup(event.id)}
+                        className="btn-signup"
+                        onClick={onRequireLogin}
                       >
-                        {busy === event.id ? 'Cancelling…' : 'Cancel'}
+                        Log in to sign up →
                       </button>
-                    </div>
-                  ) : isFull ? (
-                    <span className="event-full-badge">Event Full</span>
-                  ) : !user ? (
-                    <button
-                      className="btn-signup"
-                      onClick={onRequireLogin}
-                    >
-                      Log in to sign up →
-                    </button>
-                  ) : (
-                    <button
-                      className="btn-signup"
-                      disabled={busy === event.id}
-                      onClick={() => handleSignup(event.id)}
-                    >
-                      {busy === event.id ? 'Signing up…' : 'Sign Up →'}
-                    </button>
-                  )}
-                  {user && isSignedUp && (
-                    <div className="event-guests">
-                      <strong>Mina gäster</strong>
-                      {myGuests.length > 0 && <ul>
-                        {myGuests.map(guest => <li key={guest.id}>
-                          <span>{guest.name}</span>
-                          <button type="button" className="btn-cancel-link" disabled={busy !== null} onClick={() => handleGuest(event.id, guest.id)}>Ta bort</button>
-                        </li>)}
-                      </ul>}
-                      <form onSubmit={e => { e.preventDefault(); handleGuest(event.id) }}>
-                        <label htmlFor={`guest-${event.id}`}>Gästnamn</label>
-                        <input id={`guest-${event.id}`} value={guestNames[event.id] || ''} maxLength={200} onChange={e => setGuestNames(prev => ({ ...prev, [event.id]: e.target.value }))} />
-                        <button className="btn-signup" disabled={busy !== null || isFull} type="submit">Lägg till gäst</button>
-                      </form>
-                      {isFull && <small>Eventet är fullbokat.</small>}
-                    </div>
-                  )}
+                    ) : (
+                      <button
+                        className="btn-signup"
+                        disabled={busy === event.id}
+                        onClick={() => handleSignup(event.id)}
+                      >
+                        {busy === event.id ? 'Signing up…' : 'Sign Up →'}
+                      </button>
+                    )}
+                  </div>
                 </div>
+                {user && isSignedUp && (
+                  <div className="event-guests">
+                    <strong>Mina gäster</strong>
+                    {myGuests.length > 0 && <ul>
+                      {myGuests.map(guest => <li key={guest.id}>
+                        <span>{guest.name}{guest.status === 'pending' ? ' · Väntar på godkännande' : guest.status === 'rejected' ? ' · Avvisad' : ''}{guest.company && ` · ${guest.company}`}{guest.email && ` · ${guest.email}`}</span>
+                        <button type="button" className="btn-cancel-link" disabled={busy !== null} onClick={() => handleGuest(event.id, guest.id)}>Ta bort</button>
+                      </li>)}
+                    </ul>}
+                    <form onSubmit={e => { e.preventDefault(); handleGuest(event.id) }}>
+                      <label htmlFor={`guest-${event.id}`}>Gästnamn</label>
+                      <input id={`guest-${event.id}`} required value={guestNames[event.id] || ''} maxLength={200} onChange={e => setGuestNames(prev => ({ ...prev, [event.id]: e.target.value }))} />
+                      <label htmlFor={`guest-email-${event.id}`}>Gästens e-post</label>
+                      <input id={`guest-email-${event.id}`} type="email" required maxLength={254} value={guestEmails[event.id] || ''} onChange={e => setGuestEmails(prev => ({ ...prev, [event.id]: e.target.value }))} />
+                      <label htmlFor={`guest-company-${event.id}`}>Företag (valfritt)</label>
+                      <input id={`guest-company-${event.id}`} maxLength={200} value={guestCompanies[event.id] || ''} onChange={e => setGuestCompanies(prev => ({ ...prev, [event.id]: e.target.value }))} />
+                      <button className="btn-signup" disabled={busy !== null} type="submit">Lägg till gäst</button>
+                    </form>
+                    <small>Gästen väntar på administratörsgodkännande innan platsen räknas.</small>
+                  </div>
+                )}
               </article>
             )
           })}

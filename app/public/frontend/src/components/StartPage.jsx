@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { fetchEvents, fetchEventSignupSummary } from '../api/events'
 import { WP_API as API } from '../api/config'
 import { parseEventDate as parseAcfDate, selectNextEvent, buildRosterPrintHtml } from '../utils/eventRoster'
+import { getGuestStatus } from '../utils/guestStatus'
+import '../css/GuestStatus.css'
 import '../css/StartPage.css'
 
 const fmtKr = n => new Intl.NumberFormat('sv-SE').format(n) + ' kr'
@@ -203,12 +205,12 @@ export default function StartPage({ user }) {
           </div>
           {loaded && !currentEvent && <p className="muted">Inga kommande event.</p>}
           {currentEvent && <p className="ev-meta">
-            {attendees.length} deltagare · {breakdown[currentEvent.id]?.members || 0} medlemmar, {breakdown[currentEvent.id]?.guests || 0} gäster
+            {attendees.filter(person => person.type === 'member' || person.status === 'active').length} aktiva deltagare · {breakdown[currentEvent.id]?.members || 0} medlemmar, {breakdown[currentEvent.id]?.guests || 0} gäster
           </p>}
           {currentEvent && attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
           {attendees.length > 0 && (
             <>
-              <h3 className="signup-list-heading">Anmälda ({attendees.length})</h3>
+              <h3 className="signup-list-heading">Deltagare ({attendees.length})</h3>
               <ul className="member-list">
                 {attendees.map(m => (
                   <li key={`${m.signup_id}-${m.type}-${m.id}`}>
@@ -220,7 +222,11 @@ export default function StartPage({ user }) {
                         onError={e => { e.target.style.display = 'none' }}
                       />
                     )}
-                    <span>{m.name}<small className="roster-type">{m.type === 'guest' ? `Gäst inbjuden av ${m.inviter_name}` : 'Medlem'}</small></span>
+                    <span>{m.name}<small className="roster-type">
+                      {m.type === 'guest' ? <>Gäst inbjuden av {m.inviter_name} · <span className={getGuestStatus(m).className}>{getGuestStatus(m).label}</span></> : 'Medlem'}
+                      {m.company ? ` · ${m.company}` : ''}
+                      {m.email ? ` · ${m.email}` : ''}
+                    </small></span>
                   </li>
                 ))}
               </ul>
@@ -230,7 +236,7 @@ export default function StartPage({ user }) {
             <>
               <h3 className="signup-list-heading cancelled-heading">Avanmälda ({cancelled.length})</h3>
               <ul className="member-list cancelled-list">
-                {cancelled.map(m => <li key={`${m.signup_id}-${m.type}-${m.id}`}>{m.name}{m.type === 'guest' ? ` · Gäst inbjuden av ${m.inviter_name}` : ' · Medlem'}</li>)}
+                {cancelled.map(m => <li key={`${m.signup_id}-${m.type}-${m.id}`}>{m.name}{m.type === 'guest' ? ` · Gäst inbjuden av ${m.inviter_name}${m.email ? ` · ${m.email}` : ''}` : ' · Medlem'}</li>)}
               </ul>
             </>
           )}

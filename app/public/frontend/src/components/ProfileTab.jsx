@@ -216,6 +216,39 @@ function ProfileTab({ user }) {
             />
           </div>
           <div className="form-group">
+            <label htmlFor="profile-expertise">Är bra på</label>
+            <textarea
+              id="profile-expertise"
+              value={acf.expertise || ''}
+              onChange={event => updateField('expertise', event.target.value)}
+              placeholder="Vad är du bra på?"
+              rows={3}
+              maxLength={1000}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="profile-specific-search">Specifika sök</label>
+            <textarea
+              id="profile-specific-search"
+              value={acf.specific_search || ''}
+              onChange={event => updateField('specific_search', event.target.value)}
+              placeholder="Vad söker du?"
+              rows={3}
+              maxLength={1000}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="profile-deputy">Ersättare</label>
+            <input
+              id="profile-deputy"
+              type="text"
+              value={acf.deputy || ''}
+              onChange={event => updateField('deputy', event.target.value)}
+              placeholder="Namn på ersättare"
+              maxLength={200}
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="profile-photo">Photo URL</label>
             <input
               id="profile-photo"
@@ -270,6 +303,9 @@ function ProfileTab({ user }) {
               <tr><th scope="row">Phone</th><td>{acf.phone || 'Not set'}</td></tr>
               <tr><th scope="row">Bio</th><td>{acf.bio || 'Not set'}</td></tr>
               <tr><th scope="row">Interests</th><td>{acf.interests || 'Not set'}</td></tr>
+              <tr><th scope="row">Är bra på</th><td className="profile-multiline">{acf.expertise || 'Not set'}</td></tr>
+              <tr><th scope="row">Specifika sök</th><td className="profile-multiline">{acf.specific_search || 'Not set'}</td></tr>
+              <tr><th scope="row">Ersättare</th><td>{acf.deputy || 'Not set'}</td></tr>
               <tr>
                 <th scope="row">LinkedIn</th>
                 <td>
