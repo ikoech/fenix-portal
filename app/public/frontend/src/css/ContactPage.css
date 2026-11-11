@@ -1,0 +1,36 @@
+.contact-page { display: flex; flex-direction: column; min-height: 70vh; }
+
+.contact-content {
+    max-width: 800px; margin: 0 auto; padding: 3rem 2rem 4rem; width: 100%; flex: 1;
+}
+
+.contact-content h1 { font-size: 2.5rem; color: #222; margin-bottom: 1.5rem; }
+.contact-content h2 { font-size: 1.75rem; color: #222; margin: 2.5rem 0 1rem; }
+
+.contact-email {
+    display: inline-block; color: #2c5f7c; text-decoration: underline;
+    text-underline-offset: 3px; margin-bottom: 1rem;
+}
+.contact-email:hover { color: #e8912d; }
+
+.contact-venue a { color: #2c5f7c; text-decoration: underline; }
+.contact-time { color: #444; margin-bottom: 2rem; }
+
+.contact-map { border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+.contact-cta {
+    background-color: #5b7d8a; color: #fff; text-align: center; padding: 4rem 2rem;
+}
+.contact-cta h2 { font-weight: 300; font-size: 2.25rem; margin: 0 0 1rem; }
+.contact-cta p { opacity: 0.9; margin-bottom: 2rem; }
+
+.btn-cta {
+    display: inline-block; background-color: #e8912d; color: #fff;
+    padding: 0.75rem 2rem; border-radius: 4px; text-decoration: none; font-weight: 500;
+}
+.btn-cta:hover { background-color: #d17f1f; }
+
+@media (max-width: 768px) {
+    .contact-content h1 { font-size: 2rem; }
+    .contact-cta h2 { font-size: 1.75rem; }
+}

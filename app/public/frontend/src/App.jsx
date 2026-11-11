@@ -7,6 +7,7 @@ import MembersTab from './components/MembersTab'
 import TfaTab from './components/TfaTab'
 import SeekingTab from './components/SeekingTab'
 import DocumentTab from './components/DocumentsTab'
+import ContactPage from './components/ContactPage'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
@@ -15,11 +16,18 @@ import StartPage from './components/StartPage'
 import MemberDirectoryTab from './components/MemberDirectoryTab'
 import './App.css'
 
+function getInitialTab() {
+  const params = new URLSearchParams(window.location.search)
+  const tabParam = params.get('tab')
+  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'seeking', 'Documents', 'contact']
+  return tabParam && validTabs.includes(tabParam) ? tabParam : 'start'
+}
+
 function App() {
   const [user, setUser] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('start')
+  const [activeTab, setActiveTab] = useState(getInitialTab)
   const [showLogin, setShowLogin] = useState(false)
 
   // Restore session on load
@@ -101,6 +109,7 @@ function App() {
         )}
         {activeTab === 'members' && <MembersTab />}
         {user && activeTab === 'directory' && <MemberDirectoryTab />}
+        {activeTab === 'contact' && <ContactPage />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
         {user && activeTab === 'profile' && <ProfileTab user={user} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}
