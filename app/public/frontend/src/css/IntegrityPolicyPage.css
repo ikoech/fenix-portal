@@ -1,0 +1,125 @@
+.app > main.main--integrity-policy {
+    max-width: none;
+    padding: 0;
+}
+
+.integrity-policy-page {
+    background: #f9fbfb;
+    color: #17242a;
+    text-align: left;
+}
+
+.policy-hero {
+    min-height: 133px;
+    padding: 16px 24px 48px;
+    background: #e2eef0;
+}
+
+.policy-hero h1 {
+    margin: 0;
+    color: #071d27;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.2;
+}
+
+.policy-content {
+    width: min(100% - 48px, 800px);
+    margin: 0 auto;
+    padding: 64px 0 72px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.policy-intro {
+    margin-bottom: 1.5rem;
+}
+
+.policy-content h2 {
+    margin: 1.5rem 0 1rem;
+    color: #071d27;
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.3;
+}
+
+.policy-content section:first-of-type > h2 {
+    margin-top: 0;
+}
+
+.policy-section-content p,
+.policy-section-content ul,
+.policy-section-content ol {
+    margin-bottom: 1rem;
+}
+
+.policy-section-content ul,
+.policy-section-content ol {
+    padding-left: 1.5rem;
+}
+
+.policy-section-content li {
+    margin-bottom: 0.4rem;
+}
+
+.policy-section-content > :last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+    .policy-hero {
+        padding-inline: 16px;
+    }
+
+    .policy-content {
+        width: calc(100% - 40px);
+        padding: 48px 0 56px;
+    }
+}
+
+.policy-contact {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #ddd;
+    color: #555;
+}
+
+.policy-contact a {
+    color: #2c5f7c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.policy-contact a:hover {
+    text-decoration: none;
+}
+
+.policy-loading,
+.policy-error {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.policy-error {
+    color: #dc3545;
+}
+
+/* Print styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .integrity-policy-page,
+    .integrity-policy-page * {
+        visibility: visible;
+    }
+    .integrity-policy-page {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}

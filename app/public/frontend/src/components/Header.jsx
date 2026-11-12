@@ -70,6 +70,7 @@ function Header({
             <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
             <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
             <button className={`tab ${activeTab === 'contact' ? 'active' : ''}`} onClick={() => setActiveTab('contact')}>Kontakta oss</button>
+            <button className={`tab ${activeTab === 'integrity-policy' ? 'active' : ''}`} onClick={() => setActiveTab('integrity-policy')}>Integritetspolicy</button>
             {user ? (
               <>
                 <button className={`tab ${activeTab === 'directory' ? 'active' : ''}`} onClick={() => setActiveTab('directory')}>Medlemskatalog</button>

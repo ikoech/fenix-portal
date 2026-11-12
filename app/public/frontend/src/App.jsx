@@ -8,6 +8,7 @@ import TfaTab from './components/TfaTab'
 import SeekingTab from './components/SeekingTab'
 import DocumentTab from './components/DocumentsTab'
 import ContactPage from './components/ContactPage'
+import IntegrityPolicyPage from './components/IntegrityPolicyPage'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
@@ -19,7 +20,7 @@ import './App.css'
 function getInitialTab() {
   const params = new URLSearchParams(window.location.search)
   const tabParam = params.get('tab')
-  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'seeking', 'Documents', 'contact']
+  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'seeking', 'Documents', 'contact', 'integrity-policy']
   return tabParam && validTabs.includes(tabParam) ? tabParam : 'start'
 }
 
@@ -102,7 +103,7 @@ function App() {
         onRequestLogin={() => setShowLogin(true)}
       />
 
-      <main>
+      <main className={activeTab === 'integrity-policy' ? 'main--integrity-policy' : undefined}>
         {error && !showLogin && <p className="error-msg" role="alert">{error}</p>}
         {activeTab === 'events' && (
           <EventsTab user={user} onRequireLogin={() => setShowLogin(true)} />
@@ -110,6 +111,7 @@ function App() {
         {activeTab === 'members' && <MembersTab />}
         {user && activeTab === 'directory' && <MemberDirectoryTab />}
         {activeTab === 'contact' && <ContactPage />}
+        {activeTab === 'integrity-policy' && <IntegrityPolicyPage />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
         {user && activeTab === 'profile' && <ProfileTab user={user} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}

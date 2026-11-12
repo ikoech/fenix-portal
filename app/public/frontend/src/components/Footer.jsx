@@ -58,7 +58,7 @@ function Footer() {
                 <a href="/om-fenix">Om Fenix</a>
               </li>
               <li>
-                <a href="/integritetspolicy">Integritetspolicy</a>
+                <a href="?tab=integrity-policy">Integritetspolicy</a>
               </li>
               <li>
                 <a href="/stadgar">Stadgar</a>

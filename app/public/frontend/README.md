@@ -8,6 +8,12 @@ configure the WordPress server to allow that origin and the Authorization
 header. An unset `VITE_WORDPRESS_URL` uses same-origin requests (and the Vite
 proxy during development).
 
+The integrity policy tab reads ACF fields from the latest published
+`integritetspolicy` custom post. Registering the post type and ACF fields does
+not create an entry: create and publish a post of that type, fill in its policy
+heading and content, and enable “Show in REST API” for its ACF field group.
+The current policy stores sections 4–7 in the fourth section's content field.
+
 Event signups and guest rosters require a signed-in member. In Events, sign up
 before adding or removing guests. On the start page, use “Skriv ut / spara som
 PDF” to print the selected event roster or save it as a PDF in the print dialog.
