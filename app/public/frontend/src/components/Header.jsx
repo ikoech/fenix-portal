@@ -69,34 +69,58 @@ function Header({
             <button className={`tab ${activeTab === 'start' ? 'active' : ''}`} onClick={() => setActiveTab('start')}>Start</button>
             <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
             <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
-            <button className={`tab ${activeTab === 'contact' ? 'active' : ''}`} onClick={() => setActiveTab('contact')}>Kontakta oss</button>
-            <button className={`tab ${activeTab === 'integrity-policy' ? 'active' : ''}`} onClick={() => setActiveTab('integrity-policy')}>Integritetspolicy</button>
             {user ? (
               <>
-                <button className={`tab ${activeTab === 'directory' ? 'active' : ''}`} onClick={() => setActiveTab('directory')}>Medlemskatalog</button>
                 {isAdmin && (
                   <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
                 )}
                 <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
-                <div className="header-menu" ref={menuRef}>
+              </>
+            ) : null}
+            <div className="header-menu" ref={menuRef}>
+              <button
+                ref={menuButtonRef}
+                className={`tab header-menu-toggle${['directory', 'contact', 'integrity-policy', 'tfa', 'Documents'].includes(activeTab) ? ' active' : ''}`}
+                type="button"
+                aria-label={menuOpen ? 'Close additional navigation options' : 'Open additional navigation options'}
+                aria-expanded={menuOpen}
+                aria-controls="header-more-menu"
+                onClick={() => setMenuOpen(open => !open)}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div
+                className="header-menu-panel"
+                id="header-more-menu"
+                hidden={!menuOpen}
+              >
+                {user && (
                   <button
-                    ref={menuButtonRef}
-                    className={`tab header-menu-toggle${['tfa', 'Documents'].includes(activeTab) ? ' active' : ''}`}
+                    className={`tab ${activeTab === 'directory' ? 'active' : ''}`}
                     type="button"
-                    aria-label={menuOpen ? 'Close additional navigation options' : 'Open additional navigation options'}
-                    aria-expanded={menuOpen}
-                    aria-controls="header-more-menu"
-                    onClick={() => setMenuOpen(open => !open)}
+                    onClick={() => selectTab('directory')}
                   >
-                    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                      <path d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    Medlemskatalog
                   </button>
-                  <div
-                    className="header-menu-panel"
-                    id="header-more-menu"
-                    hidden={!menuOpen}
-                  >
+                )}
+                <button
+                  className={`tab ${activeTab === 'contact' ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => selectTab('contact')}
+                >
+                  Kontakta oss
+                </button>
+                <button
+                  className={`tab ${activeTab === 'integrity-policy' ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => selectTab('integrity-policy')}
+                >
+                  Integritetspolicy
+                </button>
+                {user && (
+                  <>
                     <button
                       className={`tab ${activeTab === 'tfa' ? 'active' : ''}`}
                       type="button"
@@ -111,12 +135,11 @@ function Header({
                     >
                       Document Library
                     </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <button className="tab" onClick={onRequestLogin}>Log in</button>
-            )}
+                  </>
+                )}
+              </div>
+            </div>
+            {!user && <button className="tab" onClick={onRequestLogin}>Log in</button>}
           </nav>
         )}
       </div>
