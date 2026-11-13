@@ -7,7 +7,6 @@ import '../css/AdminTab.css'
 
 function AdminTab({ user }) {
   const [stats, setStats] = useState(null)
-  const [recentSignups, setRecentSignups] = useState([])
   const [members, setMembers] = useState([])
   const [events, setEvents] = useState([])
   const [error, setError] = useState(null)
@@ -133,11 +132,6 @@ function AdminTab({ user }) {
         documents: docsData.length
       })
       
-      // Sort signups by date (newest first)
-      const sortedSignups = signupsData.sort((a, b) =>
-        new Date(b.date) - new Date(a.date)
-      ).slice(0, 5)
-      setRecentSignups(sortedSignups)
       setMembers(membersData)
       setEvents(eventsData)
     } catch (err) {
@@ -394,27 +388,6 @@ function AdminTab({ user }) {
             </div>
           </div>
 
-          <h3>Recent Sign-ups</h3>
-          {recentSignups.length === 0 ? (
-            <p>No sign-ups yet.</p>
-          ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Event</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentSignups.map(s => (
-                  <tr key={s.id}>
-                    <td>{s.title?.rendered || 'Unknown'}</td>
-                    <td>{new Date(s.date).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
         </div>
       )}
 

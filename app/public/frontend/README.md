@@ -14,6 +14,12 @@ not create an entry: create and publish a post of that type, fill in its policy
 heading and content, and enable “Show in REST API” for its ACF field group.
 The current policy stores sections 4–7 in the fourth section's content field.
 
+The Stadgar footer link opens the public bylaws tab. It reads `bylaws_link`
+from the latest published `stadgar` custom post. Enable “Show in REST API” for
+its ACF field group and publish an entry with a publicly accessible PDF URL.
+Google Drive file links use Drive's download endpoint; for other external PDFs,
+downloads depend on the hosting server and browser.
+
 Event signups and guest rosters require a signed-in member. In Events, sign up
 before adding or removing guests. On the start page, use “Skriv ut / spara som
 PDF” to print the selected event roster or save it as a PDF in the print dialog.

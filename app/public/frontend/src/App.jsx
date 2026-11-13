@@ -5,10 +5,10 @@ import EventsTab from './components/EventsTab'
 import ProfileTab from './components/ProfileTab'
 import MembersTab from './components/MembersTab'
 import TfaTab from './components/TfaTab'
-import SeekingTab from './components/SeekingTab'
 import DocumentTab from './components/DocumentsTab'
 import ContactPage from './components/ContactPage'
 import IntegrityPolicyPage from './components/IntegrityPolicyPage'
+import BylawsPage from './components/BylawsPage'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import AdminTab from './components/AdminTab'
@@ -20,7 +20,7 @@ import './App.css'
 function getInitialTab() {
   const params = new URLSearchParams(window.location.search)
   const tabParam = params.get('tab')
-  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'seeking', 'Documents', 'contact', 'integrity-policy']
+  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'Documents', 'contact', 'integrity-policy', 'bylaws']
   return tabParam && validTabs.includes(tabParam) ? tabParam : 'start'
 }
 
@@ -112,10 +112,10 @@ function App() {
         {user && activeTab === 'directory' && <MemberDirectoryTab />}
         {activeTab === 'contact' && <ContactPage />}
         {activeTab === 'integrity-policy' && <IntegrityPolicyPage />}
+        {activeTab === 'bylaws' && <BylawsPage />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
         {user && activeTab === 'profile' && <ProfileTab user={user} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}
-        {user && activeTab === 'seeking' && <SeekingTab user={user} />}
         {user && activeTab === 'Documents' && (
           <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />
         )}

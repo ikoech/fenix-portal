@@ -81,7 +81,7 @@ function Header({
                 <div className="header-menu" ref={menuRef}>
                   <button
                     ref={menuButtonRef}
-                    className={`tab header-menu-toggle${['tfa', 'seeking', 'Documents'].includes(activeTab) ? ' active' : ''}`}
+                    className={`tab header-menu-toggle${['tfa', 'Documents'].includes(activeTab) ? ' active' : ''}`}
                     type="button"
                     aria-label={menuOpen ? 'Close additional navigation options' : 'Open additional navigation options'}
                     aria-expanded={menuOpen}
@@ -103,13 +103,6 @@ function Header({
                       onClick={() => selectTab('tfa')}
                     >
                       TFA Deals
-                    </button>
-                    <button
-                      className={`tab ${activeTab === 'seeking' ? 'active' : ''}`}
-                      type="button"
-                      onClick={() => selectTab('seeking')}
-                    >
-                      Seeking
                     </button>
                     <button
                       className={`tab ${activeTab === 'Documents' ? 'active' : ''}`}

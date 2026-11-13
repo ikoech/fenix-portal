@@ -52,7 +52,7 @@ function Footer() {
             <h3>Medlemsportalen</h3>
             <ul>
               <li>
-                <a href="/portal?tab=directory">Medlemmar</a>
+                <a href="/portal?tab=members">Medlemmar</a>
               </li>
               <li>
                 <a href="/om-fenix">Om Fenix</a>
@@ -61,7 +61,7 @@ function Footer() {
                 <a href="?tab=integrity-policy">Integritetspolicy</a>
               </li>
               <li>
-                <a href="/stadgar">Stadgar</a>
+                <a href="?tab=bylaws">Stadgar</a>
               </li>
             </ul>
           </div>

@@ -1,0 +1,55 @@
+.bylaws-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
+}
+
+.bylaws-content h1 {
+    font-size: 2.5rem;
+    color: #222;
+    margin-bottom: 1.5rem;
+}
+
+.bylaws-link-container {
+    margin: 2rem 0;
+}
+
+.bylaws-link {
+    display: inline-block;
+    color: #2c5f7c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-size: 1.1rem;
+}
+
+.bylaws-link:hover {
+    color: #e8912d;
+}
+
+.bylaws-loading,
+.bylaws-error {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.bylaws-error {
+    color: #dc3545;
+}
+
+/* Print styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .bylaws-page,
+    .bylaws-page * {
+        visibility: visible;
+    }
+    .bylaws-page {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}
