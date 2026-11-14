@@ -15,12 +15,14 @@ import AdminTab from './components/AdminTab'
 import { fetchUserProfile } from './api/auth'
 import StartPage from './components/StartPage'
 import MemberDirectoryTab from './components/MemberDirectoryTab'
+import ApplicationPage from './components/ApplicationPage'
 import './App.css'
 
 function getInitialTab() {
   const params = new URLSearchParams(window.location.search)
   const tabParam = params.get('tab')
-  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'Documents', 'contact', 'integrity-policy', 'bylaws']
+  if (!tabParam && window.location.pathname.replace(/\/+$/, '') === '/bli-medlem') return 'application'
+  const validTabs = ['start', 'events', 'directory', 'profile', 'admin', 'members', 'tfa', 'Documents', 'contact', 'integrity-policy', 'bylaws', 'application']
   return tabParam && validTabs.includes(tabParam) ? tabParam : 'start'
 }
 
@@ -113,6 +115,7 @@ function App() {
         {activeTab === 'contact' && <ContactPage />}
         {activeTab === 'integrity-policy' && <IntegrityPolicyPage />}
         {activeTab === 'bylaws' && <BylawsPage />}
+        {activeTab === 'application' && <ApplicationPage />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
         {user && activeTab === 'profile' && <ProfileTab user={user} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}

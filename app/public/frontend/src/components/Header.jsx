@@ -69,6 +69,7 @@ function Header({
             <button className={`tab ${activeTab === 'start' ? 'active' : ''}`} onClick={() => setActiveTab('start')}>Start</button>
             <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
             <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
+            <button className={`tab ${activeTab === 'application' ? 'active' : ''}`} onClick={() => setActiveTab('application')}>Bli medlem</button>
             {user ? (
               <>
                 {isAdmin && (

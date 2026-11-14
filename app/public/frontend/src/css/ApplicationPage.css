@@ -1,0 +1,109 @@
+.application-page {
+  max-width: 760px;
+  margin: 0 auto;
+  color: #17212b;
+}
+
+.application-intro {
+  text-align: center;
+}
+
+.application-eyebrow {
+  color: #e48d1d;
+  font-weight: 600;
+}
+
+.application-intro h1 {
+  margin: 1rem 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.application-intro > p:not(.application-eyebrow) {
+  max-width: 570px;
+  margin: 1.5rem auto;
+}
+
+.application-documents a {
+  color: inherit;
+}
+
+.application-form,
+.application-success {
+  max-width: 500px;
+  margin: 4rem auto 0;
+}
+
+.application-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.application-field {
+  width: 100%;
+}
+
+.application-field--half {
+  width: calc(50% - .5rem);
+}
+
+.application-field label {
+  display: block;
+  margin-bottom: .25rem;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.application-field label span {
+  color: #d64545;
+}
+
+.application-field input,
+.application-field textarea {
+  width: 100%;
+  padding: .65rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font: inherit;
+  background: #fff;
+}
+
+.application-field textarea {
+  resize: vertical;
+}
+
+.application-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  margin: 1.5rem 0;
+  font-size: .9rem;
+}
+
+.application-consent input {
+  flex: 0 0 auto;
+  margin-top: .35rem;
+}
+
+.application-submit {
+  padding: .7rem 1rem;
+  border: 0;
+  border-radius: 4px;
+  background: #e99b2b;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.application-submit:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .application-field--half {
+    width: 100%;
+  }
+}

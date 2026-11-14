@@ -3,6 +3,7 @@ import { updateEvent, deleteEvent, getPendingGuests, approveGuest, rejectGuest }
 import { updateMember, deleteMember } from '../api/members'
 import { WP_API, FENIX_API } from '../api/config'
 import { formatACFDate } from '../utils/date'
+import ApplicationsAdmin from './ApplicationsAdmin'
 import '../css/AdminTab.css'
 
 function AdminTab({ user }) {
@@ -356,7 +357,10 @@ function AdminTab({ user }) {
         <button className={`admin-tab ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSection('overview')}>Overview</button>
         <button className={`admin-tab ${activeSection === 'members' ? 'active' : ''}`} onClick={() => setActiveSection('members')}>Members</button>
         <button className={`admin-tab ${activeSection === 'events' ? 'active' : ''}`} onClick={() => setActiveSection('events')}>Events</button>
+        <button className={`admin-tab ${activeSection === 'applications' ? 'active' : ''}`} onClick={() => setActiveSection('applications')}>Ansökningar</button>
       </div>
+
+      {activeSection === 'applications' && <ApplicationsAdmin />}
 
       {/* Overview */}
       {activeSection === 'overview' && stats && (

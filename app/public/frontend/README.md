@@ -29,10 +29,43 @@ stores these addresses but does not send invitation emails.
 Cancelled signups remain in the printout; signing up again creates a fresh
 signup without automatically restoring its previous guests.
 
-Run frontend tests with `node --test src/utils/eventRoster.test.js src/api/events.test.js src/api/directory.test.js src/api/admin.test.js src/api/members.test.js`.
+## Membership applications
+
+The public `/bli-medlem` page submits applications to the private
+`fenix_application` post type through the `fenix/v1/applications` API. Deploy
+`fenix-applications.php` as a must-use plugin alongside the frontend. The web
+server must serve the React app for `/bli-medlem` as well as `/portal`. CPT UI
+must register `fenix_application`, and its ACF group must contain the fields
+`fornamn`, `efternamn`, `e-postadress`, `telefonnummer`, `foretagsnamn`,
+`organisationsnummer`, `roll`, `bransch`, `referenser` and `samtycke_godkant`.
+The form requires all of them. The plugin hides the CPT's normal WordPress UI,
+REST endpoint, archive and public queries; administrators review applications
+in the portal's Admin > Ansökningar section instead.
+
+Submission creates a private draft, not a WordPress user. Approval creates a
+subscriber and sends a WordPress password-setup link; rejection sends a
+decision message. A failed email can be retried from the application. An
+existing account with the same email requires manual review and is never
+automatically linked. If an account is created but linking it to an application
+fails, resolve that explicitly rather than creating a second account. A mail
+status of “Avsänd” means WordPress accepted the message, not that it was
+delivered. Configure and test mail delivery and the WordPress site URL before
+deployment. Decide on a retention/deletion policy for application data.
+
+The form links to the portal's bylaws and privacy policy and to the existing
+public membership documents. Verify the documents, costs and access before
+accepting applications. The acceptance timestamp and form version are stored
+with each application; update the version in the plugin when the agreement
+changes. Pending applicants should contact the network to arrange meeting
+attendance; portal event signup still requires a user account. Submission is
+limited to five valid attempts per IP per hour. If a reverse proxy is used,
+configure it to pass the real client address as `REMOTE_ADDR` securely.
+
+Run frontend tests with `node --test src/utils/eventRoster.test.js src/api/events.test.js src/api/directory.test.js src/api/admin.test.js src/api/members.test.js src/api/applications.test.js`.
 The isolated PHP signup tests can be run from the repository root with
 `php tests/event-signups.php`; they do not modify the WordPress database.
 Run `php tests/member-profiles.php` for isolated profile-update tests.
+Run `php tests/applications.php` for the isolated application workflow tests.
 
 ## Deploying guest approval and member exports
 
