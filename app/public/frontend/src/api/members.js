@@ -51,6 +51,20 @@ export async function updateMember(authHeader, userId, data) {
   return readResponse(res, 'Failed to update member')
 }
 
+export async function changePassword(authHeader, currentPassword, newPassword) {
+  if (!authHeader) throw new Error('Not logged in — please log in.')
+
+  const res = await fetch(`${FENIX_API}/users/me/password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: authHeader
+    },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+  })
+  return readResponse(res, 'Failed to change password')
+}
+
 export async function deleteMember(authHeader, userId) {
   if (!authHeader) throw new Error('Not logged in — please log in.')
 

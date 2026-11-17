@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { updateMember } from '../api/members'
+import { changePassword, updateMember } from '../api/members'
 import '../css/ProfileTab.css'
 
 import { WP_API } from '../api/config'
@@ -12,13 +12,13 @@ function copyProfile(profile) {
     roles: Array.isArray(profile.roles) ? [...profile.roles] : []
   }
 }
-
+// Get the display role for the profile
 function getRole(profile) {
   const role = profile.acf?.role || profile.roles?.join(', ')
-  return role || 'Not set'
+  return role || 'Välj en roll'
 }
 
-function ProfileTab({ user }) {
+function ProfileTab({ user, onPasswordChanged }) {
   const [profile, setProfile] = useState(null)
   const [savedProfile, setSavedProfile] = useState(null)
   const [editMode, setEditMode] = useState(false)
@@ -26,10 +26,15 @@ function ProfileTab({ user }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
 
   useEffect(() => {
     let isCurrent = true
-
+    // Load the profile data from the API
     async function loadProfile() {
       setLoading(true)
       setError('')
@@ -42,7 +47,7 @@ function ProfileTab({ user }) {
         }
         return
       }
-
+      // Fetch the profile data from the API
       try {
         const res = await fetch(PROFILE_URL, {
           cache: 'no-store',
@@ -66,13 +71,13 @@ function ProfileTab({ user }) {
         if (isCurrent) setLoading(false)
       }
     }
-
+    // Call the function to load the profile data
     loadProfile()
     return () => {
       isCurrent = false
     }
   }, [user?.id])
-
+  // Update a specific field in the profile's ACF data
   function updateField(field, value) {
     setProfile(current => ({
       ...current,
@@ -80,12 +85,14 @@ function ProfileTab({ user }) {
     }))
   }
 
+  // Start editing the profile
   function startEdit() {
     setError('')
     setSuccess('')
     setEditMode(true)
   }
 
+  // Cancel editing the profile and revert changes
   function cancelEdit() {
     if (savedProfile) setProfile(copyProfile(savedProfile))
     setEditMode(false)
@@ -93,6 +100,7 @@ function ProfileTab({ user }) {
     setSuccess('')
   }
 
+  // Save the updated profile to the API
   async function saveProfile(event) {
     event.preventDefault()
     const authHeader = sessionStorage.getItem('fenix_auth')
@@ -124,6 +132,36 @@ function ProfileTab({ user }) {
       setError(err instanceof Error ? err.message : 'Could not update profile.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Save the updated password to the API
+  async function savePassword(event) {
+    event.preventDefault()
+    setPasswordError('')
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('The new passwords do not match.')
+      return
+    }
+
+    const authHeader = sessionStorage.getItem('fenix_auth')
+    if (!authHeader) {
+      setPasswordError('Not logged in — please log in.')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      await changePassword(authHeader, currentPassword, newPassword)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      onPasswordChanged()
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : 'Could not change password.')
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -320,6 +358,50 @@ function ProfileTab({ user }) {
           <button type="button" className="btn-edit-profile" onClick={startEdit}>Edit Profile</button>
         </div>
       )}
+
+      <form className="password-form" onSubmit={savePassword}>
+        <h3>Change password</h3>
+        <p>After changing your password, you’ll need to sign in again.</p>
+        {passwordError && <p className="error-msg" role="alert">{passwordError}</p>}
+        <div className="form-group">
+          <label htmlFor="profile-current-password">Current password</label>
+          <input
+            id="profile-current-password"
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={event => setCurrentPassword(event.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="profile-new-password">New password (at least 8 characters)</label>
+          <input
+            id="profile-new-password"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            value={newPassword}
+            onChange={event => setNewPassword(event.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="profile-confirm-password">Confirm new password</label>
+          <input
+            id="profile-confirm-password"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            value={confirmPassword}
+            onChange={event => setConfirmPassword(event.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn-save-profile" disabled={changingPassword}>
+          {changingPassword ? 'Changing...' : 'Change password'}
+        </button>
+      </form>
     </section>
   )
 }

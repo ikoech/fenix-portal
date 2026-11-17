@@ -113,6 +113,24 @@
   padding: 32px;
 }
 
+.password-form {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.1);
+  padding: 32px;
+  margin-top: 24px;
+}
+
+.password-form h3 {
+  margin: 0 0 8px;
+  color: #2C3E50;
+}
+
+.password-form > p:not(.error-msg) {
+  color: #666;
+  margin: 0 0 20px;
+}
+
 .profile-form h2 {
   text-align: center;
   margin-bottom: 24px;

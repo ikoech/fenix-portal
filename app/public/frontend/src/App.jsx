@@ -32,6 +32,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(getInitialTab)
   const [showLogin, setShowLogin] = useState(false)
+  const [loginNotice, setLoginNotice] = useState('')
 
   // Restore session on load
   useEffect(() => {
@@ -75,6 +76,7 @@ function App() {
       sessionStorage.setItem('fenix_user', JSON.stringify(userData))
       sessionStorage.setItem('fenix_auth', authHeader)
       setShowLogin(false)
+      setLoginNotice('')
     } catch (err) {
       setError(err.message)
     }
@@ -86,6 +88,12 @@ function App() {
     setActiveTab('start')
     sessionStorage.removeItem('fenix_user')
     sessionStorage.removeItem('fenix_auth')
+  }
+
+  const handlePasswordChanged = () => {
+    handleLogout()
+    setLoginNotice('Your password has been changed. Please sign in with your new password.')
+    setShowLogin(true)
   }
 
   if (loading) return <div className="status">Loading...</div>
@@ -117,7 +125,7 @@ function App() {
         {activeTab === 'bylaws' && <BylawsPage />}
         {activeTab === 'application' && <ApplicationPage />}
         {user && activeTab === 'admin' && <AdminTab user={user} />}
-        {user && activeTab === 'profile' && <ProfileTab user={user} />}
+        {user && activeTab === 'profile' && <ProfileTab user={user} onPasswordChanged={handlePasswordChanged} />}
         {user && activeTab === 'tfa' && <TfaTab user={user} />}
         {user && activeTab === 'Documents' && (
           <DocumentTab authHeader={sessionStorage.getItem('fenix_auth')} />
@@ -152,6 +160,7 @@ function App() {
             >
               ×
             </button>
+            {loginNotice && <p className="success-msg" role="status">{loginNotice}</p>}
             <Login onLogin={handleLogin} error={error} />
           </div>
         </div>

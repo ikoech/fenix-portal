@@ -61,10 +61,16 @@ attendance; portal event signup still requires a user account. Submission is
 limited to five valid attempts per IP per hour. If a reverse proxy is used,
 configure it to pass the real client address as `REMOTE_ADDR` securely.
 
+Members can change their password from the Profile tab by entering their
+current password and confirming a new password of at least 8 characters. A
+successful change invalidates existing portal JWTs and requires signing in
+again with the new password.
+
 Run frontend tests with `node --test src/utils/eventRoster.test.js src/api/events.test.js src/api/directory.test.js src/api/admin.test.js src/api/members.test.js src/api/applications.test.js`.
 The isolated PHP signup tests can be run from the repository root with
 `php tests/event-signups.php`; they do not modify the WordPress database.
 Run `php tests/member-profiles.php` for isolated profile-update tests.
+Run `php tests/password-change.php` for isolated password-change tests.
 Run `php tests/applications.php` for the isolated application workflow tests.
 
 ## Deploying guest approval and member exports
