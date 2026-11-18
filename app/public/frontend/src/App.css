@@ -20,6 +20,11 @@ body, html, #root, .app {
   flex: 1;
 }
 
+.app > main.main--members {
+  max-width: none;
+  padding: 0;
+}
+
 /* StartPage background: on the whole app so it sits behind header and footer */
 .app--start {
   background:

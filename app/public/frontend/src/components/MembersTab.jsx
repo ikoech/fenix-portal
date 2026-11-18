@@ -2,11 +2,88 @@ import { useState, useEffect } from 'react'
 import { fetchMembers } from '../api/members'
 import '../css/MembersTab.css'
 
+function MemberPhoto({ member, className = '' }) {
+  if (member.acf?.photo) {
+    return <img src={member.acf.photo} alt={member.name || 'Member'} className={className} />
+  }
+
+  return (
+    <div className={`${className} member-avatar`} aria-hidden="true">
+      {(member.name || 'M').charAt(0).toUpperCase()}
+    </div>
+  )
+}
+
+function MemberDetails({ member, onBack }) {
+  const { acf = {} } = member
+  const contactItems = [
+    ['Telefon', acf.phone, false],
+    ['E-post', member.email, false],
+    ['LinkedIn', acf.linkedin, true],
+    ['Webbplats', acf.website, true],
+  ]
+
+  return (
+    <section className="member-detail-view">
+      <div className="member-detail-banner">
+        <button type="button" className="member-detail-back" onClick={onBack}>
+          <span aria-hidden="true">←</span> Tillbaka till medlemmar
+        </button>
+        <h2>{member.name || 'Medlem'}</h2>
+        {acf.company && <p>{acf.company}</p>}
+      </div>
+
+      <div className="member-detail-layout">
+        <article className="member-detail-copy">
+          {acf.company && <p className="member-detail-company">{acf.company}</p>}
+          {acf.bio ? <p>{acf.bio}</p> : <p>Information om medlemmen kommer snart.</p>}
+          {acf.industry && (
+            <div className="member-detail-industry">
+              <strong>Bransch</strong>
+              <span>{acf.industry}</span>
+            </div>
+          )}
+        </article>
+
+        <aside className="member-detail-card" aria-label={`Kontaktuppgifter för ${member.name}`}>
+          <div className="member-detail-identity">
+            <MemberPhoto member={member} className="member-detail-photo" />
+            <div>
+              <h3>{member.name || 'Medlem'}</h3>
+              {acf.role && <p>{acf.role}</p>}
+            </div>
+          </div>
+
+          <dl className="member-detail-contact">
+            {contactItems.map(([label, value, isExternal]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>
+                  {!value ? (
+                    <span className="member-detail-unavailable">Ej angiven</span>
+                  ) : isExternal ? (
+                    <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
+                  ) : label === 'E-post' ? (
+                    <a href={`mailto:${value}`}>{value}</a>
+                  ) : label === 'Telefon' ? (
+                    <a href={`tel:${value}`}>{value}</a>
+                  ) : value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </div>
+    </section>
+  )
+}
+
 function MembersTab() {
   const [members, setMembers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedMember, setSelectedMember] = useState(null)
 
   useEffect(() => {
     let isCurrent = true
@@ -69,7 +146,15 @@ function MembersTab() {
     return searchTerms.every(term => searchableText.includes(term))
   })
 
-  // Render the members section with search functionality and error/loading states
+  if (selectedMember) {
+    return (
+      <MemberDetails
+        member={selectedMember}
+        onBack={() => setSelectedMember(null)}
+      />
+    )
+  }
+
   return (
     <section className="members-section">
       <h2>TEAM MEMBER</h2>
@@ -101,32 +186,26 @@ function MembersTab() {
             {filtered.map(member => (
               <div className="member-card" key={member.id}>
                 <div className="member-image-wrap">
-                  {member.acf?.photo ? (
-                    <img src={member.acf.photo} alt={member.name} className="member-image" />
-                  ) : (
-                    <div className="member-avatar">
-                      {(member.name || 'M').charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <MemberPhoto member={member} className="member-image" />
                 </div>
 
                 <div className="member-info">
                   <h3 className="member-name">{member.name || 'Unknown'}</h3>
-                  {member.acf?.role && <p className="member-role">{member.acf.role}</p>}
                   {member.acf?.company && <p className="member-company">{member.acf.company}</p>}
-                  {member.acf?.industry && <p className="member-industry">{member.acf.industry}</p>}
-                  {member.acf?.bio && <p className="member-bio">{member.acf.bio}</p>}
-                  {member.acf?.website && (
-                    <p className="member-website">
-                      <a href={member.acf.website} target="_blank" rel="noopener noreferrer">Website</a>
-                    </p>
-                  )}
+                  <p className="member-bio">
+                    {member.acf?.bio || 'Läs mer om denna medlem och företaget.'}
+                  </p>
                 </div>
 
                 <div className="member-actions">
-                  {member.acf?.linkedin && (
-                    <a href={member.acf.linkedin} target="_blank" rel="noopener noreferrer" className="btn-linkedin">LinkedIn</a>
-                  )}
+                  <button
+                    type="button"
+                    className="btn-read-more"
+                    onClick={() => setSelectedMember(member)}
+                    aria-label={`Read more about ${member.name || 'this member'}`}
+                  >
+                    Läs mer
+                  </button>
                 </div>
               </div>
             ))}

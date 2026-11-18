@@ -1,54 +1,48 @@
-/* --- Members Section --- */
-
 .members-section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 56px 24px 72px;
 }
 
 .members-section h2 {
-  text-align: center;
   color: #0a1628;
   font-size: 32px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
   letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .members-section h2::after {
+  background: #f5a623;
   content: '';
   display: block;
-  width: 60px;
   height: 3px;
-  background: #0a1628;
   margin: 12px auto 16px;
+  width: 60px;
 }
 
 .members-subtitle {
-  text-align: center;
   color: #666;
   font-size: 16px;
-  margin-bottom: 40px;
+  margin: 0 auto 40px;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  text-align: center;
 }
 
-/* --- Search --- */
-
 .members-search {
-  max-width: 500px;
   margin: 0 auto 40px;
+  max-width: 500px;
 }
 
 .members-search input {
-  width: 100%;
-  padding: 12px 20px;
   border: 2px solid #ddd;
   border-radius: 25px;
-  font-size: 15px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font: inherit;
   outline: none;
+  padding: 12px 20px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
 }
 
 .members-search input:focus {
@@ -56,201 +50,334 @@
   box-shadow: 0 0 0 3px rgba(10, 22, 40, 0.1);
 }
 
-/* --- Members Grid --- */
-
 .members-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 32px;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* --- Member Card --- */
-
 .member-card {
-  background: #0a1628;
-  border-radius: 20px 20px 40px 40px;
+  background: #fff;
+  border-radius: 12px;
+  border-top: 4px solid #f5a623;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   text-align: center;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 20px rgba(10, 22, 40, 0.15);
-  display: flex;
-  flex-direction: column;
-  min-height: 420px;
 }
 
 .member-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(10, 22, 40, 0.25);
 }
 
-/* --- Member Image --- */
-
 .member-image-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 24px 12px;
   width: 100%;
-  height: 220px;
-  margin: 24px auto 0;
-  position: relative;
-  z-index: 1;
-  flex: 0 0 220px;
 }
 
 .member-image {
+  border: 4px solid #f5a623;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
+  height: 160px;
   object-fit: cover;
   object-position: center;
-  border: 0;
-  box-shadow: none;
+  width: 390px;
 }
 
 .member-avatar {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #F5A623, #cf6d17);
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 48px;
+  background: linear-gradient(135deg, #f5a623, #cf6d17);
+  color: #fff;
+  display: flex;
+  font-size: 64px;
   font-weight: 700;
-  color: white;
-  border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  justify-content: center;
 }
 
-/* --- Member Info --- */
-
 .member-info {
-  padding: 20px 24px 16px;
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
+  padding: 12px 24px 8px;
 }
 
 .member-name {
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
+  color: #2c3e50;
+  font-size: 19px;
   margin: 0 0 4px;
 }
 
-.member-role {
-  color: #F5A623;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0 0 8px;
-}
-
 .member-company {
-  color: #aab;
-  font-size: 14px;
+  color: #d98616;
+  font-size: 24px;
+  font-family: "Segoe Script", "Bradley Hand", cursive;
+  font-weight: 600;
   margin: 0 0 12px;
-}
-
-.member-industry,
-.member-phone,
-.member-interests,
-.member-website {
-  color: #aab;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 8px;
 }
 
 .member-bio {
-  color: #99a;
+  color: #555;
+  display: -webkit-box;
   font-size: 13px;
   line-height: 1.6;
-  margin: 0 0 12px;
-  text-align: left;
-  white-space: normal;
-  overflow: visible;
-  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
 }
 
-.member-email {
-  color: #778;
+.member-actions {
+  padding: 16px 24px 24px;
+}
+
+/*.btn-read-more {
+  background: #f5a623;
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 22px;
+  transition: background 0.2s;
+}
+
+.btn-read-more:hover {
+  background: #cf7e0e;
+}*/
+
+.btn-read-more{
+  background-image: linear-gradient(to right, #3D7EAA 0%, #FFE47A 51%, #3D7EAA 100%);
+}
+
+.btn-read-more {
+  padding: 15px 45px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;
+  box-shadow: 0 0 20px #eee;
+  border-radius: 10px;
+  display: block;
+  outline: none;
+  border: none;
+}
+
+.btn-read-more:hover {
+  background-position: right center;
+  color: #fff;
+  text-decoration: none;
+}
+
+.member-detail-view {
+  min-height: 70vh;
+}
+
+.member-detail-banner {
+  background: #f5f6f8;
+  border-bottom: 1px solid #e4e8eb;
+  padding: 42px max(24px, calc((100vw - 1100px) / 2));
+  position: relative;
+}
+
+.member-detail-banner h2 {
+  color: #172333;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 26px 0 4px;
+}
+
+.member-detail-banner > p {
+  color: #d88b19;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.member-detail-back {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #596574;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 7px;
+  font: inherit;
+  font-size: 14px;
+  padding: 0;
+}
+
+.member-detail-back:hover {
+  color: #d17e0d;
+}
+
+.member-detail-layout {
+  display: grid;
+  gap: clamp(48px, 8vw, 100px);
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 64px 24px 80px;
+}
+
+.member-detail-copy {
+  align-self: start;
+  color: #172333;
+  font-size: 15px;
+}
+
+.member-detail-company {
+  color: #e89b2d;
+  font-family: "Segoe Script", "Bradley Hand", cursive;
+  font-size: 28px;
+  line-height: 1.2;
+  margin-bottom: 28px;
+}
+
+p{
+    text-align: justify;
+
+}
+
+.member-detail-industry {
+  display: flex;
+  flex-direction: column;
+  margin-top: 28px;
+}
+
+.member-detail-industry strong {
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.member-detail-industry span {
+  color: #596574;
+}
+
+.member-detail-card {
+  align-self: start;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(27, 43, 61, 0.1);
+  padding: 28px;
+}
+
+.member-detail-identity {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.member-detail-identity h3 {
+  color: #172333;
+  font-size: 19px;
+  line-height: 1.25;
+  margin: 0 0 3px;
+}
+
+.member-detail-identity p {
+  color: #697583;
   font-size: 13px;
   margin: 0;
 }
 
-.member-email a,
-.member-website a {
-  color: inherit;
+.member-detail-photo {
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 72px;
+  object-fit: cover;
+  width: 72px;
+}
+
+.member-detail-photo.member-avatar {
+  font-size: 28px;
+}
+
+.member-detail-contact {
+  border-top: 1px solid #e7ebee;
+  margin: 0;
+}
+
+.member-detail-contact > div {
+  border-bottom: 1px solid #e7ebee;
+  padding: 15px 0;
+}
+
+.member-detail-contact dt {
+  color: #172333;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.member-detail-contact dd {
+  margin: 0;
+}
+
+.member-detail-contact a {
+  color: #d98616;
+  font-size: 14px;
   overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-/* --- Member Actions --- */
-
-.member-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 0 24px 24px;
+.member-detail-unavailable {
+  color: #8a949f;
+  font-size: 14px;
 }
 
-.btn-contact {
-  background: white;
-  color: #0a1628;
-  border: none;
-  padding: 8px 24px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 13px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s;
+.error-msg,
+.loading-msg,
+.empty-msg {
+  padding: 40px 20px;
+  text-align: center;
 }
-
-.btn-contact:hover {
-  background: #f0f0f0;
-}
-
-.btn-linkedin {
-  background: #0077b5;
-  color: white;
-  border: none;
-  padding: 8px 24px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 13px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-linkedin:hover {
-  background: #005f8a;
-}
-
-/* --- Messages --- */
 
 .error-msg {
-  text-align: center;
   color: #d64545;
-  padding: 20px;
 }
 
-.loading-msg {
-  text-align: center;
-  color: #666;
-  padding: 40px;
-  font-size: 16px;
-}
-
+.loading-msg,
 .empty-msg {
-  text-align: center;
-  color: #999;
-  padding: 40px;
-  font-size: 16px;
+  color: #777;
 }
-
-/* --- Responsive --- */
 
 @media (max-width: 768px) {
+  .members-section {
+    padding: 40px 18px 56px;
+  }
+
   .members-grid {
     grid-template-columns: 1fr;
+  }
+
+  .member-detail-banner {
+    padding: 30px 22px 40px;
+  }
+
+  .member-detail-banner h2 {
+    margin-top: 36px;
+  }
+
+  .member-detail-layout {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 36px;
+    padding: 32px 18px 56px;
+  }
+
+  .member-detail-card {
+    width: 100%;
   }
 }

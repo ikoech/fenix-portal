@@ -470,11 +470,13 @@ function fenix_get_public_member_profile_data( $user_id ) {
 	$acf     = $profile['acf'];
 
 	return array(
-		'id'   => $profile['id'],
-		'name' => $profile['name'],
-		'acf'  => array(
+		'id'    => $profile['id'],
+		'name'  => $profile['name'],
+		'email' => sanitize_email( $profile['email'] ),
+		'acf'   => array(
 			'company'  => fenix_public_profile_text( $acf['company'] ),
 			'bio'      => fenix_public_profile_text( $acf['bio'] ),
+			'phone'    => fenix_public_profile_text( $acf['phone'] ),
 			'industry' => fenix_public_profile_text( $acf['industry'] ),
 			'role'     => fenix_public_profile_text( $acf['role'] ),
 			'website'  => fenix_public_profile_url( $acf['website'] ),
