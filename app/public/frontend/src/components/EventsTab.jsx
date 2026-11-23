@@ -385,7 +385,7 @@ function EventsTab({ user, onRequireLogin }) {
                     <strong>Mina gäster</strong>
                     {myGuests.length > 0 && <ul>
                       {myGuests.map(guest => <li key={guest.id}>
-                        <span>{guest.name}{guest.status === 'pending' ? ' · Väntar på godkännande' : guest.status === 'rejected' ? ' · Avvisad' : ''}{guest.company && ` · ${guest.company}`}{guest.email && ` · ${guest.email}`}</span>
+                        <span>{guest.name}{guest.status === 'rejected' ? ' · Avvisad' : ''}{guest.company && ` · ${guest.company}`}{guest.email && ` · ${guest.email}`}</span>
                         <button type="button" className="btn-cancel-link" disabled={busy !== null} onClick={() => handleGuest(event.id, guest.id)}>Ta bort</button>
                       </li>)}
                     </ul>}

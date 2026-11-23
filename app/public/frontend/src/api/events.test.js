@@ -29,11 +29,11 @@ test('guest request sends trimmed name, email and company', async () => {
     assert.match(url, /\/event-signups\/42\/guests$/)
     assert.equal(options.headers.Authorization, '******')
     assert.deepEqual(JSON.parse(options.body), { name: 'Guest', email: 'guest@example.com', company: 'Example AB' })
-    return { ok: true, json: async () => ({ id: 'guest-id', name: 'Guest', email: 'guest@example.com', company: 'Example AB', status: 'pending' }) }
+    return { ok: true, json: async () => ({ id: 'guest-id', name: 'Guest', email: 'guest@example.com', company: 'Example AB', status: 'active' }) }
   }
   const guest = await addEventGuest('******', 42, '  Guest  ', ' guest@example.com ', ' Example AB ')
   assert.equal(guest.email, 'guest@example.com')
-  assert.equal(guest.status, 'pending')
+  assert.equal(guest.status, 'active')
 })
 
 test('guest request surfaces invalid email errors', async () => {

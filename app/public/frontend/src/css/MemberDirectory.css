@@ -1,7 +1,12 @@
+.app > main.main--directory {
+  max-width: 1440px;
+}
+
 .member-directory {
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 0;
+  text-align: left;
 }
 
 .member-directory-header {
@@ -9,20 +14,28 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .member-directory-header h2 {
-  color: #0f686a;
+  color: #253f3e;
+  margin: 0;
 }
 
 .member-directory-header button {
-  border: 1px solid #0f8b8d;
-  border-radius: 6px;
+  border: 1px solid #9aada3;
+  border-radius: 8px;
   background: #fff;
-  color: #0f686a;
-  padding: .5rem .75rem;
+  color: #294a44;
+  padding: .65rem 1rem;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
   cursor: pointer;
+}
+
+.member-directory-header button:hover:not(:disabled) {
+  background: #edf3ee;
 }
 
 .member-directory-actions {
@@ -41,7 +54,7 @@
 }
 
 .member-directory-search {
-  margin-bottom: 1rem;
+  margin-bottom: 1.75rem;
 }
 
 .member-directory-search-field {
@@ -51,9 +64,11 @@
 .member-directory-search-field input {
   width: 100%;
   box-sizing: border-box;
-  padding: .6rem 2.25rem .6rem .75rem;
-  border: 1px solid #d5dfe1;
-  border-radius: 6px;
+  padding: .8rem 2.75rem .8rem 1rem;
+  border: 1px solid #c9d6ce;
+  border-radius: 8px;
+  background: #fff;
+  color: #253f3e;
   font: inherit;
 }
 
@@ -83,70 +98,131 @@
   font-size: .9rem;
 }
 
-.directory-member-card {
-  background: #fff;
-  border: 1px solid #d5dfe1;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+.directory-list {
+  margin-bottom: 2rem;
 }
 
-.directory-member-card h3 {
-  color: #2c3e50;
-  margin-bottom: .5rem;
+.directory-list h3 {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 .75rem;
+  color: #253f3e;
+  font-size: 1.1rem;
 }
 
-.directory-member-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: .75rem 1rem;
+.directory-list h3 span {
+  border-radius: 999px;
+  padding: .15rem .55rem;
+  background: #e5eee7;
+  color: #405c4c;
+  font-size: .75rem;
 }
 
-.directory-member-fields dt {
-  font-weight: 600;
-}
-
-.directory-member-fields dd {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.directory-guests {
-  border-top: 1px solid #d5dfe1;
-  margin-top: 1rem;
-  padding-top: .75rem;
-}
-
-.directory-guests h4 {
-  margin-bottom: .5rem;
-}
-
-.directory-guest-table-wrap {
+.directory-table-wrap {
   overflow-x: auto;
+  border: 1px solid #b9c9bf;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.directory-table-wrap:focus-visible {
+  outline: 2px solid #0f686a;
+  outline-offset: 3px;
 }
 
 .member-directory table {
   width: 100%;
+  min-width: 850px;
   border-collapse: collapse;
+  font-size: .86rem;
 }
 
 .member-directory th,
 .member-directory td {
-  border: 1px solid #d5dfe1;
-  padding: .6rem;
+  padding: .85rem;
+  border-right: 1px solid #d3ded6;
+  border-bottom: 1px solid #e1e9e3;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
-.member-directory th {
-  background: #edf3f4;
+.member-directory tr > :last-child {
+  border-right: 0;
+}
+
+.member-directory tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.member-directory thead th {
+  background-color: #588790;
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+
+.member-directory tbody tr:nth-child(even) {
+  background: #f3f6f3;
+}
+
+.member-directory tbody th {
+  color: #263d34;
+  font-weight: 600;
+}
+
+.member-directory tbody td {
+  white-space: pre-wrap;
+}
+
+.member-directory tr > :first-child {
+  width: 3rem;
+}
+
+.directory-expertise summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.directory-expertise summary::-webkit-details-marker {
+  display: none;
+}
+
+.directory-expertise-more,
+.directory-expertise-less {
+  color: #0f686a;
+  font-weight: 600;
   white-space: nowrap;
+}
+
+.directory-expertise-less,
+.directory-expertise[open] .directory-expertise-preview,
+.directory-expertise[open] .directory-expertise-more {
+  display: none;
+}
+
+.directory-expertise[open] .directory-expertise-less {
+  display: inline;
+}
+
+.directory-expertise p {
+  margin-top: .5rem;
+}
+
+.directory-print-expertise {
+  display: none;
 }
 
 @media (max-width: 600px) {
   .member-directory-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .app > main.main--directory {
+    padding: 1.25rem 1rem;
   }
 }
 
@@ -176,14 +252,34 @@
     margin-bottom: 1rem;
   }
 
-  .directory-member-card {
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .directory-print-expertise {
+    display: inline;
+    white-space: pre-wrap;
+  }
+
+  .directory-table-wrap {
+    overflow: visible;
+    border-radius: 0;
+  }
+
+  .member-directory table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .member-directory thead {
+    display: table-header-group;
+  }
+
+  .member-directory thead th {
+    background: #fff;
+    color: #000;
     border-color: #999;
   }
 
-  .directory-guest-table-wrap {
-    overflow: visible;
+  .member-directory tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .member-directory th,

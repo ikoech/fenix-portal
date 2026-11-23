@@ -34,6 +34,14 @@ export function filterMembers(members, query) {
     .some(field => member[field]?.toLowerCase().includes(q)))
 }
 
+export function shortenExpertise(value, maxLength = 140) {
+  const text = String(value ?? '').replace(/\s+/g, ' ').trim()
+  if (text.length <= maxLength) return text
+  const prefix = text.slice(0, maxLength)
+  const lastSpace = prefix.lastIndexOf(' ')
+  return `${lastSpace > 0 ? prefix.slice(0, lastSpace) : prefix}…`
+}
+
 export function buildDirectoryCSV(rows) {
   const headers = ['Namn', 'Företag', 'Är bra på!', 'Ersättare', 'Specifika sök', 'Gästnamn', 'E-post', 'Inbjuden av']
   const escapeCell = value => {

@@ -89,30 +89,6 @@ add_action(
 
 		register_rest_route(
 			'fenix/v1',
-			'/guests/pending',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => 'fenix_get_pending_guests',
-				'permission_callback' => static function () {
-					return is_user_logged_in() && current_user_can( 'manage_options' );
-				},
-			)
-		);
-		foreach ( array( 'approve', 'reject' ) as $action ) {
-			register_rest_route(
-				'fenix/v1',
-				'/guests/(?P<id>[a-f0-9-]+)/' . $action,
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => 'fenix_' . $action . '_guest',
-					'permission_callback' => static function () {
-						return is_user_logged_in() && current_user_can( 'manage_options' );
-					},
-				)
-			);
-		}
-		register_rest_route(
-			'fenix/v1',
 			'/member-directory',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -343,8 +319,8 @@ function fenix_signup_guests( $signup_id ) {
 	return array_values(
 		array_map(
 			static function ( $guest ) {
-				$status = isset( $guest['status'] ) && in_array( $guest['status'], array( 'pending', 'active', 'rejected' ), true )
-					? $guest['status']
+				$status = isset( $guest['status'] ) && 'rejected' === $guest['status']
+					? 'rejected'
 					: 'active';
 				return array_merge( $guest, array( 'status' => $status ) );
 			},
@@ -470,11 +446,65 @@ function fenix_rebuild_all_counts() {
 			$events[ $event_id ] = true;
 		}
 	}
+
 	foreach ( array_keys( $events ) as $event_id ) {
 		$result = fenix_rebuild_active_counts( (int) $event_id );
 		if ( is_wp_error( $result ) ) {
 			error_log( sprintf( 'Fenix count rebuild failed for event %d: %s', $event_id, $result->get_error_message() ) );
 		}
+	}
+}
+
+function fenix_migrate_pending_event_guests() {
+	if ( get_option( 'fenix_guest_auto_approval_v1' ) ) {
+		return;
+	}
+
+	$affected_events = array();
+	$signup_ids      = get_posts(
+		array(
+			'post_type'      => 'event_signup',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		)
+	);
+
+	foreach ( $signup_ids as $signup_id ) {
+		$guests = get_post_meta( $signup_id, 'fenix_guests', true );
+		if ( ! is_array( $guests ) ) {
+			continue;
+		}
+		$changed = false;
+		foreach ( $guests as &$guest ) {
+			if ( is_array( $guest ) && isset( $guest['status'] ) && 'pending' === $guest['status'] ) {
+				$guest['status'] = 'active';
+				$changed         = true;
+			}
+		}
+		unset( $guest );
+		if ( ! $changed ) {
+			continue;
+		}
+		if ( ! fenix_write_verified_meta( $signup_id, 'fenix_guests', array_values( $guests ) ) ) {
+			error_log( sprintf( 'Fenix guest migration failed for signup %d.', $signup_id ) );
+			return;
+		}
+		$event_id = absint( get_post_meta( $signup_id, 'event_id', true ) );
+		if ( $event_id ) {
+			$affected_events[ $event_id ] = true;
+		}
+	}
+
+	foreach ( array_keys( $affected_events ) as $event_id ) {
+		$result = fenix_rebuild_active_counts( (int) $event_id );
+		if ( is_wp_error( $result ) ) {
+			error_log( sprintf( 'Fenix guest migration count rebuild failed for event %d: %s', $event_id, $result->get_error_message() ) );
+			return;
+		}
+	}
+	if ( ! update_option( 'fenix_guest_auto_approval_v1', '1', false ) ) {
+		error_log( 'Fenix guest migration completion could not be recorded.' );
 	}
 }
 
@@ -490,6 +520,7 @@ add_action( 'init', static function () {
 	}
 } );
 add_action( 'fenix_rebuild_all_counts', 'fenix_rebuild_all_counts' );
+add_action( 'init', 'fenix_migrate_pending_event_guests' );
 
 function fenix_unschedule_count_rebuild() {
 	$result = wp_clear_scheduled_hook( 'fenix_rebuild_all_counts', array(), true );
@@ -736,19 +767,32 @@ function fenix_add_event_guest( WP_REST_Request $request ) {
 				return new WP_Error( 'fenix_duplicate_guest', 'Gästen finns redan i din anmälan.', array( 'status' => 409 ) );
 			}
 		}
+		$count = fenix_prepare_event_count( $event_id );
+		if ( is_wp_error( $count ) ) {
+			return $count;
+		}
+		$capacity_error = fenix_event_capacity_error( $event_id );
+		if ( $capacity_error ) {
+			return $capacity_error;
+		}
+		$dirty = fenix_mark_count_dirty( $event_id );
+		if ( is_wp_error( $dirty ) ) {
+			return $dirty;
+		}
 		$guest = array(
 			'id'         => wp_generate_uuid4(),
 			'name'       => $name,
 			'email'      => $email,
 			'company'    => $company,
-			'status'     => 'pending',
+			'status'     => 'active',
 			'created_at' => current_time( 'mysql' ),
 		);
 		$guests[] = $guest;
 		if ( ! update_post_meta( $signup_id, 'fenix_guests', $guests ) ) {
 			return new WP_Error( 'fenix_guest_save_failed', 'The guest could not be saved.', array( 'status' => 500 ) );
 		}
-		return new WP_REST_Response( $guest, 201 );
+		$result = fenix_finish_count_change( $event_id, $count + 1 );
+		return is_wp_error( $result ) ? $result : new WP_REST_Response( $guest, 201 );
 	} );
 }
 
@@ -807,151 +851,6 @@ function fenix_remove_event_guest( WP_REST_Request $request ) {
 		$result = fenix_finish_count_change( $event_id, $count - $guest_count_change );
 		return is_wp_error( $result ) ? $result : new WP_REST_Response( array( 'removed' => true ) );
 	} );
-}
-
-function fenix_find_guest_signup( $guest_id ) {
-	foreach ( get_posts( array( 'post_type' => 'event_signup', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $signup_id ) {
-		foreach ( fenix_signup_guests( $signup_id ) as $guest ) {
-			if ( $guest['id'] === $guest_id ) {
-				return array( 'signup_id' => (int) $signup_id, 'guest' => $guest );
-			}
-		}
-	}
-	return null;
-}
-
-function fenix_change_pending_guest_status( $guest_id, $status ) {
-	$found = fenix_find_guest_signup( $guest_id );
-	if ( ! $found ) {
-		return new WP_Error( 'fenix_guest_not_found', 'The guest does not exist.', array( 'status' => 404 ) );
-	}
-	$signup_id = $found['signup_id'];
-	$event_id  = absint( get_post_meta( $signup_id, 'event_id', true ) );
-	if ( ! $event_id ) {
-		return new WP_Error( 'fenix_invalid_event', 'The guest signup has no valid event.', array( 'status' => 400 ) );
-	}
-
-	return fenix_with_event_lock( $event_id, static function () use ( $guest_id, $status, $signup_id, $event_id ) {
-		wp_cache_delete( $signup_id, 'post_meta' );
-		clean_post_cache( $signup_id );
-		$signup = get_post( $signup_id );
-		if ( ! $signup || 'event_signup' !== $signup->post_type || 'publish' !== $signup->post_status ) {
-			return new WP_Error( 'fenix_signup_not_found', 'The signup does not exist.', array( 'status' => 404 ) );
-		}
-		if ( absint( get_post_meta( $signup_id, 'event_id', true ) ) !== $event_id ) {
-			return new WP_Error( 'fenix_signup_changed', 'The signup event changed; retry.', array( 'status' => 409 ) );
-		}
-		if ( 'active' === $status && get_post_meta( $signup_id, 'cancelled_at', true ) ) {
-			return new WP_Error( 'fenix_signup_cancelled', 'The signup is no longer active.', array( 'status' => 409 ) );
-		}
-		$member_id = absint( get_post_meta( $signup_id, 'member_id', true ) );
-		if ( 'active' === $status && ( ! $member_id || ! get_userdata( $member_id ) ) ) {
-			return new WP_Error( 'fenix_inviter_not_found', 'The inviting member no longer exists.', array( 'status' => 404 ) );
-		}
-		$guests = fenix_signup_guests( $signup_id );
-		$guest_index = null;
-		foreach ( $guests as $index => $guest ) {
-			if ( $guest['id'] === $guest_id ) {
-				$guest_index = $index;
-				break;
-			}
-		}
-		if ( null === $guest_index ) {
-			return new WP_Error( 'fenix_guest_not_found', 'The guest does not exist.', array( 'status' => 404 ) );
-		}
-		if ( 'pending' !== $guests[ $guest_index ]['status'] ) {
-			return new WP_Error( 'fenix_guest_not_pending', 'Only pending guests can be reviewed.', array( 'status' => 409 ) );
-		}
-
-		$count = null;
-		if ( 'active' === $status ) {
-			$event = get_post( $event_id );
-			if ( ! $event || 'event' !== $event->post_type || 'publish' !== $event->post_status ) {
-				return new WP_Error( 'fenix_invalid_event', 'The event is no longer available.', array( 'status' => 404 ) );
-			}
-			$count = fenix_prepare_event_count( $event_id );
-			if ( is_wp_error( $count ) ) {
-				return $count;
-			}
-			$capacity_error = fenix_event_capacity_error( $event_id );
-			if ( $capacity_error ) {
-				return $capacity_error;
-			}
-			$dirty = fenix_mark_count_dirty( $event_id );
-			if ( is_wp_error( $dirty ) ) {
-				return $dirty;
-			}
-		}
-
-		$guests[ $guest_index ]['status'] = $status;
-		if ( ! fenix_write_verified_meta( $signup_id, 'fenix_guests', array_values( $guests ) ) ) {
-			return new WP_Error( 'fenix_guest_save_failed', 'The guest status could not be saved.', array( 'status' => 500 ) );
-		}
-		if ( 'active' === $status ) {
-			$result = fenix_finish_count_change( $event_id, $count + 1 );
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
-		}
-		return new WP_REST_Response( array( 'id' => $guest_id, 'status' => $status ) );
-	} );
-}
-
-function fenix_approve_guest( WP_REST_Request $request ) {
-	return fenix_change_pending_guest_status( (string) $request->get_param( 'id' ), 'active' );
-}
-
-function fenix_reject_guest( WP_REST_Request $request ) {
-	return fenix_change_pending_guest_status( (string) $request->get_param( 'id' ), 'rejected' );
-}
-
-function fenix_get_pending_guests() {
-	$pending = array();
-	foreach ( get_posts( array( 'post_type' => 'event_signup', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $signup_id ) {
-		$member_id = absint( get_post_meta( $signup_id, 'member_id', true ) );
-		$event_id  = absint( get_post_meta( $signup_id, 'event_id', true ) );
-		$member    = $member_id ? get_userdata( $member_id ) : false;
-		$event     = $event_id ? get_post( $event_id ) : null;
-		if ( ! $member || ! $event || 'event' !== $event->post_type || 'publish' !== $event->post_status || get_post_meta( $signup_id, 'cancelled_at', true ) ) {
-			continue;
-		}
-		foreach ( fenix_signup_guests( $signup_id ) as $guest ) {
-			if ( 'pending' !== $guest['status'] ) {
-				continue;
-			}
-			$signup_post = get_post( $signup_id );
-			$created_at  = isset( $guest['created_at'] ) && is_scalar( $guest['created_at'] )
-				? (string) $guest['created_at']
-				: ( isset( $signup_post->post_date ) ? (string) $signup_post->post_date : '' );
-			$pending[] = array(
-				'id'           => $guest['id'],
-				'name'         => $guest['name'],
-				'email'        => isset( $guest['email'] ) && is_scalar( $guest['email'] ) ? (string) $guest['email'] : '',
-				'company'      => isset( $guest['company'] ) && is_scalar( $guest['company'] ) ? (string) $guest['company'] : '',
-				'inviter_name' => $member->display_name,
-				'event_name'   => get_the_title( $event_id ),
-				'event_date'   => get_post_meta( $event_id, 'event_date', true ),
-				'created_at'   => $created_at,
-				'_sort'        => (int) strtotime( $created_at ),
-			);
-		}
-	}
-	usort(
-		$pending,
-		static function ( $left, $right ) {
-			$time_order = $left['_sort'] <=> $right['_sort'];
-			if ( 0 !== $time_order ) {
-				return $time_order;
-			}
-			$date_order = strcmp( $left['created_at'], $right['created_at'] );
-			return 0 !== $date_order ? $date_order : strcmp( $left['id'], $right['id'] );
-		}
-	);
-	foreach ( $pending as &$guest ) {
-		unset( $guest['_sort'] );
-	}
-	unset( $guest );
-	return rest_ensure_response( $pending );
 }
 
 function fenix_get_member_directory_export() {

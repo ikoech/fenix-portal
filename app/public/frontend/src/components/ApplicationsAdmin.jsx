@@ -89,7 +89,7 @@ function ApplicationsAdmin() {
             ))}
             <div><dt>Villkor godkända</dt><dd>{application.fields.samtycke_godkant ? 'Ja' : 'Nej'}</dd></div>
           </dl>
-          <div className="pending-guests-actions">
+          <div className="application-actions">
             {(application.state === 'pending' || application.state === 'provisioning') && (
               <button type="button" className="btn-approve" disabled={busy !== null || loading} onClick={() => handleAction(application.id, 'approve')}>
                 {application.state === 'provisioning' ? 'Fortsätt godkänna' : 'Godkänn'}

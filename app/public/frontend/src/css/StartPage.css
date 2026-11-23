@@ -65,9 +65,10 @@
   box-shadow:0 6px 18px rgba(0,0,0,.18);
 }
 .sp-panel h2{margin:0 0 .75rem;font-size:1.05rem;color:#0f8b8d}
-.signup-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.signup-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .signup-panel-header h2{margin-bottom:.2rem}
 .signup-panel-header .ev-meta{margin:0}
+.signup-download-actions{display:flex;gap:.5rem;flex-shrink:0;flex-wrap:wrap}
 .download-signups{border:1px solid #0f8b8d;background:#fff;color:#0f8b8d;border-radius:6px;padding:.4rem .65rem;cursor:pointer;white-space:nowrap}
 .download-signups:hover{background:#0f8b8d;color:#fff}
 .signup-list-heading{font-size:.85rem;color:#5a6b70;margin:1rem 0 .35rem}

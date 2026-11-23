@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { selectNextEvent, parseEventDate, buildRosterPrintHtml } from './eventRoster.js'
+import { selectNextEvent, parseEventDate, buildRosterCSV, buildRosterPrintHtml } from './eventRoster.js'
 
 const event = (id, date) => ({ id, acf: { event_date: date } })
 
@@ -36,4 +36,19 @@ test('print roster includes status, attribution and cancellation details with es
   assert.match(html, /Avanmäld/)
   assert.match(html, /2026-11-08/)
   assert.match(html, /Admin/)
+})
+
+test('CSV roster includes active attendees and protects spreadsheet formulas', () => {
+  const csv = buildRosterCSV('Årsmöte', '23 november 2026', [
+    { name: '=SUM(1,1)', type: 'member', email: 'member@example.com', company: 'Member "Company"' },
+    { name: 'Guest', type: 'guest', email: 'guest@example.com', company: 'Guest Company', status: 'active', inviter_name: 'Member' },
+    { name: 'Rejected', type: 'guest', status: 'rejected' }
+  ])
+
+  assert.equal(csv.charCodeAt(0), 0xfeff)
+  assert.match(csv, /"Årsmöte"/)
+  assert.match(csv, /"'=SUM\(1,1\)"/)
+  assert.match(csv, /"Member ""Company"""/)
+  assert.match(csv, /"Guest","Gäst","Guest Company","guest@example\.com","Member","Anmäld"/)
+  assert.doesNotMatch(csv, /Rejected/)
 })

@@ -25,6 +25,52 @@ const escapeHtml = value => String(value ?? '')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#039;')
 
+const escapeCsvCell = value => {
+  let text = String(value ?? '')
+  const first = text.search(/\S/)
+  if (first >= 0 && '=+-@'.includes(text[first])) text = `${text.slice(0, first)}'${text.slice(first)}`
+  return `"${text.replace(/"/g, '""')}"`
+}
+
+export function buildRosterCSV(title, date, attendees) {
+  const headers = ['Event', 'Datum', 'Namn', 'Typ', 'Företag', 'E-post', 'Inbjuden av', 'Status']
+  const rows = attendees
+    .filter(person => person.type === 'member' || person.status === 'active')
+    .map(person => [
+      title,
+      date,
+      person.name,
+      person.type === 'guest' ? 'Gäst' : 'Medlem',
+      person.company,
+      person.email,
+      person.type === 'guest' ? person.inviter_name : '',
+      person.type === 'guest' ? getGuestStatus(person).label : 'Anmäld'
+    ])
+  return '\uFEFF' + [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\r\n')
+}
+
+export function downloadRosterCSV(title, date, attendees) {
+  const blob = new Blob([buildRosterCSV(title, date, attendees)], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  const filename = title
+    .toLocaleLowerCase('sv-SE')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || 'deltagarlista'
+  link.href = url
+  link.download = `${filename}_${date.replace(/\s+/g, '-')}.csv`
+  link.hidden = true
+  document.body.appendChild(link)
+  try {
+    link.click()
+  } finally {
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+}
+
 export function buildRosterPrintHtml(title, date, active, cancelled) {
   const rows = [...active.map(person => ({
     ...person,
@@ -39,7 +85,7 @@ export function buildRosterPrintHtml(title, date, active, cancelled) {
     th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: left; }
     th { background: #f0f2f3; }
     .status-active { color: #1a7f37; } .status-cancelled { color: #6b7280; }
-    .status-pending { color: #b45309; } .status-rejected { color: #b42318; }
+    .status-rejected { color: #b42318; }
     @media print {
       body { margin: 15mm; }
       body * { visibility: hidden; }

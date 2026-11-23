@@ -113,7 +113,7 @@ function App() {
         onRequestLogin={() => setShowLogin(true)}
       />
 
-      <main className={activeTab === 'integrity-policy' ? 'main--integrity-policy' : activeTab === 'members' ? 'main--members' : undefined}>
+      <main className={activeTab === 'integrity-policy' ? 'main--integrity-policy' : activeTab === 'members' ? 'main--members' : activeTab === 'directory' ? 'main--directory' : undefined}>
         {error && !showLogin && <p className="error-msg" role="alert">{error}</p>}
         {activeTab === 'events' && (
           <EventsTab user={user} onRequireLogin={() => setShowLogin(true)} />

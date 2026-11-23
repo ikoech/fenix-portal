@@ -87,7 +87,7 @@
   height: 160px;
   object-fit: cover;
   object-position: center;
-  width: 390px;
+  width: 280px;
 }
 
 .member-avatar {
@@ -136,22 +136,6 @@
 .member-actions {
   padding: 16px 24px 24px;
 }
-
-/*.btn-read-more {
-  background: #f5a623;
-  border: 0;
-  border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 9px 22px;
-  transition: background 0.2s;
-}
-
-.btn-read-more:hover {
-  background: #cf7e0e;
-}*/
 
 .btn-read-more{
   background-image: linear-gradient(to right, #3D7EAA 0%, #FFE47A 51%, #3D7EAA 100%);

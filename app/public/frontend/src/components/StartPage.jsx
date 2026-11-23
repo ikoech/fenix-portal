@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchEvents, fetchEventSignupSummary } from '../api/events'
 import { WP_API as API } from '../api/config'
-import { parseEventDate as parseAcfDate, selectNextEvent, buildRosterPrintHtml } from '../utils/eventRoster'
+import { parseEventDate as parseAcfDate, selectNextEvent, buildRosterPrintHtml, downloadRosterCSV } from '../utils/eventRoster'
 import { getGuestStatus } from '../utils/guestStatus'
 import '../css/GuestStatus.css'
 import '../css/StartPage.css'
@@ -139,6 +139,22 @@ export default function StartPage({ user }) {
     }
   }
 
+  const downloadSignupList = async () => {
+    if (!currentEvent) return
+
+    const titleDocument = new DOMParser().parseFromString(currentEvent.title?.rendered || 'Event', 'text/html')
+    const title = titleDocument.documentElement.textContent || 'Event'
+    const eventDate = parseAcfDate(currentEvent.acf?.event_date)
+    const csvDate = eventDate ? eventDate.toLocaleDateString('sv-SE') : 'Inget datum'
+
+    try {
+      const summary = await fetchEventSignupSummary(sessionStorage.getItem('fenix_auth'))
+      downloadRosterCSV(title, csvDate, summary.attendees[currentEvent.id] || [])
+    } catch (e) {
+      setErr(e.message)
+    }
+  }
+
   const cards = [
     { label: 'Medlemmar totalt', value: stats.members },
     { label: 'Veckans event', value: stats.week },
@@ -198,9 +214,14 @@ export default function StartPage({ user }) {
               {currentEvent && <p className="ev-meta">{fmtDate(currentEvent.acf?.event_date)}</p>}
             </div>
             {currentEvent && (
-              <button className="download-signups" type="button" onClick={printSignupList}>
-                Skriv ut / spara som PDF
-              </button>
+              <div className="signup-download-actions">
+                <button className="download-signups" type="button" onClick={printSignupList}>
+                  Skriv ut / spara som PDF
+                </button>
+                <button className="download-signups" type="button" onClick={downloadSignupList}>
+                  Ladda ner CSV
+                </button>
+              </div>
             )}
           </div>
           {loaded && !currentEvent && <p className="muted">Inga kommande event.</p>}

@@ -1,7 +1,6 @@
 const STATUS = {
   active: { label: 'Anmäld', className: 'status-active' },
   cancelled: { label: 'Avanmäld', className: 'status-cancelled' },
-  pending: { label: 'Väntar på godkännande', className: 'status-pending' },
   rejected: { label: 'Avvisad', className: 'status-rejected' }
 }
 
