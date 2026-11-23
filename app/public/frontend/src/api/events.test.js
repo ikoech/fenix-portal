@@ -13,7 +13,7 @@ test('roster rejects missing auth and sends the existing authorization header', 
     assert.equal(options.headers.Authorization, '******')
     return { ok: true, json: async () => ({ counts: {}, signupIds: {}, breakdown: {}, attendees: {}, cancelled: {} }) }
   }
-  await assert.rejects(fetchEventSignupSummary(''), /Not logged in/)
+  await assert.rejects(fetchEventSignupSummary(''), /inte inloggad/)
   assert.equal(called, false)
   await fetchEventSignupSummary('******')
   assert.equal(called, true)

@@ -18,10 +18,10 @@ export async function fetchMembers() {
     const res = await fetch(`${FENIX_API}/members?per_page=${perPage}&page=${page}`, {
       cache: 'no-store'
     })
-    const data = await readResponse(res, 'Failed to fetch members')
+    const data = await readResponse(res, 'Kunde inte hämta medlemmar')
 
     if (!Array.isArray(data)) {
-      throw new Error('The members response was not a list.')
+      throw new Error('Svaret med medlemmar var ogiltigt.')
     }
 
     members.push(...data)
@@ -37,8 +37,8 @@ export async function fetchMembers() {
 }
 
 export async function updateMember(authHeader, userId, data) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
-  if (!userId) throw new Error('Could not identify the member to update.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
+  if (!userId) throw new Error('Det gick inte att identifiera medlemmen som ska uppdateras.')
 
   const res = await fetch(`${FENIX_API}/users/${userId}`, {
     method: 'POST',
@@ -48,11 +48,11 @@ export async function updateMember(authHeader, userId, data) {
     },
     body: JSON.stringify(data)
   })
-  return readResponse(res, 'Failed to update member')
+  return readResponse(res, 'Kunde inte uppdatera medlemmen')
 }
 
 export async function changePassword(authHeader, currentPassword, newPassword) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
 
   const res = await fetch(`${FENIX_API}/users/me/password`, {
     method: 'POST',
@@ -62,15 +62,15 @@ export async function changePassword(authHeader, currentPassword, newPassword) {
     },
     body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
   })
-  return readResponse(res, 'Failed to change password')
+  return readResponse(res, 'Kunde inte byta lösenord')
 }
 
 export async function deleteMember(authHeader, userId) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
 
   const res = await fetch(`${WP_API}/users/${userId}?force=true&reassign=false`, {
     method: 'DELETE',
     headers: { Authorization: authHeader }
   })
-  return readResponse(res, 'Failed to delete member')
+  return readResponse(res, 'Kunde inte ta bort medlemmen')
 }

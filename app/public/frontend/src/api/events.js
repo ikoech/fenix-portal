@@ -7,9 +7,9 @@ export async function fetchEvents() {
   let totalPages = 1
   do {
     const res = await fetch(`${API_BASE}/event?per_page=100&page=${page}&_embed=1`)
-    if (!res.ok) throw new Error(`Failed to fetch events (${res.status})`)
+    if (!res.ok) throw new Error(`Kunde inte hämta evenemang (${res.status})`)
     const data = await res.json()
-    if (!Array.isArray(data)) throw new Error('The events response was not a list.')
+    if (!Array.isArray(data)) throw new Error('Svaret med evenemang var ogiltigt.')
     events.push(...data)
     const pages = Number(res.headers.get('X-WP-TotalPages'))
     totalPages = Number.isInteger(pages) && pages > 0 ? pages : (data.length === 100 ? page + 1 : page)
@@ -19,7 +19,7 @@ export async function fetchEvents() {
 }
 
 export async function fetchEventSignupSummary(authHeader) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
 
   const res = await fetch(SIGNUPS_API, {
     cache: 'no-store',
@@ -27,12 +27,12 @@ export async function fetchEventSignupSummary(authHeader) {
   })
   if (!res.ok) {
     const error = await res.json().catch(() => null)
-    throw new Error(error?.message || `Failed to fetch signup summary (${res.status})`)
+    throw new Error(error?.message || `Kunde inte hämta anmälningar (${res.status})`)
   }
   const summary = await res.json()
   if (!summary || typeof summary !== 'object' || !summary.counts || !summary.signupIds ||
       !summary.breakdown || !summary.attendees || !summary.cancelled) {
-    throw new Error('The event signup summary response was invalid.')
+    throw new Error('Svaret med anmälningar var ogiltigt.')
   }
   return summary
 }
@@ -50,7 +50,7 @@ export async function createEventSignup(authHeader, eventId) {
   })
   if (!res.ok) {
     const error = await res.json()
-    throw new Error(error.message || `Signup failed (${res.status})`)
+    throw new Error(error.message || `Anmälan misslyckades (${res.status})`)
   }
   return res.json()
 }
@@ -62,19 +62,19 @@ export async function deleteEventSignup(authHeader, signupId) {
   })
   if (!res.ok) {
     const error = await res.json()
-    throw new Error(error.message || `Could not cancel signup (${res.status})`)
+    throw new Error(error.message || `Kunde inte avboka anmälan (${res.status})`)
   }
   return res.json()
 }
 
 async function guestRequest(authHeader, url, options) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
   const res = await fetch(url, {
     ...options,
     headers: { Authorization: authHeader, 'Content-Type': 'application/json' }
   })
   const data = await res.json().catch(() => null)
-  if (!res.ok) throw new Error(data?.message || `Guest request failed (${res.status})`)
+  if (!res.ok) throw new Error(data?.message || `Gästbegäran misslyckades (${res.status})`)
   return data
 }
 
@@ -91,11 +91,11 @@ export function removeEventGuest(authHeader, signupId, guestId) {
 }
 
 export async function fetchEventSignups(authHeader) {
-  if (!authHeader) throw new Error('Not logged in — please log in.')
+  if (!authHeader) throw new Error('Du är inte inloggad. Logga in och försök igen.')
 
   const res = await fetch(`${API_BASE}/event-signups`, {
     headers: { Authorization: authHeader }
   })
-  if (!res.ok) throw new Error(`Failed to fetch signups (${res.status})`)
+  if (!res.ok) throw new Error(`Kunde inte hämta anmälningar (${res.status})`)
   return res.json()
 }

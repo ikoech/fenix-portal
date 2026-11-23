@@ -1,5 +1,5 @@
 export function formatACFDate(dateStr) {
-  if (!dateStr) return 'TBD'
+  if (!dateStr) return 'Ej angivet'
   const date = String(dateStr)
   const ymd = date.match(/^(\d{4})[-/]?(\d{2})[-/]?(\d{2})$/)
   const dmy = date.match(/^(\d{2})[-/]?(\d{2})[-/]?(\d{4})$/)
@@ -15,7 +15,7 @@ export function formatACFDate(dateStr) {
     ymd && isValidDate(Number(ymd[1]), Number(ymd[2]), Number(ymd[3]))
   const dayFirst =
     dmy && isValidDate(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]))
-  if (!yearFirst && !dayFirst) return 'TBD'
+  if (!yearFirst && !dayFirst) return 'Ej angivet'
 
   const [, y, m, d] = yearFirst
     ? ymd
@@ -25,6 +25,6 @@ export function formatACFDate(dateStr) {
   const month = Number(m)
   const day = Number(d)
 
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec']
   return `${day} ${months[month - 1]} ${year}`
 }

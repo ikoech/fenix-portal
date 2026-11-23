@@ -4,7 +4,7 @@ export async function fetchAllWithCount(endpoint, authHeader) {
   const res = await fetch(`${API_BASE}/${endpoint}?per_page=100`, {
     headers: { 'Authorization': authHeader }
   })
-  if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`)
+  if (!res.ok) throw new Error(`Kunde inte hämta ${endpoint}`)
   const data = await res.json()
   return data
 }
@@ -18,7 +18,7 @@ export async function updateEvent(authHeader, eventId, data) {
     },
     body: JSON.stringify(data)
   })
-  if (!res.ok) throw new Error('Failed to update event')
+  if (!res.ok) throw new Error('Kunde inte uppdatera evenemanget')
   return res.json()
 }
 
@@ -27,6 +27,6 @@ export async function deleteEvent(authHeader, eventId) {
     method: 'DELETE',
     headers: { 'Authorization': authHeader }
   })
-  if (!res.ok) throw new Error('Failed to delete event')
+  if (!res.ok) throw new Error('Kunde inte ta bort evenemanget')
   return res.json()
 }

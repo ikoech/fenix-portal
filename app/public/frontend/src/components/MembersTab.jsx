@@ -4,7 +4,7 @@ import '../css/MembersTab.css'
 
 function MemberPhoto({ member, className = '' }) {
   if (member.acf?.photo) {
-    return <img src={member.acf.photo} alt={member.name || 'Member'} className={className} />
+    return <img src={member.acf.photo} alt={member.name || 'Medlem'} className={className} />
   }
 
   return (
@@ -93,7 +93,7 @@ function MembersTab() {
       .then(data => {
         if (!isCurrent) return
         if (!Array.isArray(data)) {
-          throw new Error('The members response was not a list.')
+          throw new Error('Svaret med medlemmar var ogiltigt.')
         }
         setMembers(data)
       })
@@ -157,9 +157,9 @@ function MembersTab() {
 
   return (
     <section className="members-section">
-      <h2>TEAM MEMBER</h2>
+      <h2>VÅRA MEDLEMMAR</h2>
       <p className="members-subtitle">
-        Connect with our network of professionals
+        Kom i kontakt med vårt nätverk av yrkesverksamma
       </p>
 
       {error && <p className="error-msg">{error}</p>}
@@ -167,19 +167,19 @@ function MembersTab() {
       <div className="members-search">
         <input
           type="text"
-          aria-label="Search members"
-          placeholder="Search by name, company, or bio..."
+          aria-label="Sök medlemmar"
+          placeholder="Sök på namn, företag eller presentation..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
 
       {loading ? (
-        <p className="loading-msg">Loading members...</p>
+        <p className="loading-msg">Hämtar medlemmar...</p>
       ) : !error && (
         filtered.length === 0 ? (
           <p className="empty-msg">
-            {query ? 'No members match your search.' : 'No members found.'}
+            {query ? 'Inga medlemmar matchar din sökning.' : 'Inga medlemmar hittades.'}
           </p>
         ) : (
           <div className="members-grid">
@@ -190,7 +190,7 @@ function MembersTab() {
                 </div>
 
                 <div className="member-info">
-                  <h3 className="member-name">{member.name || 'Unknown'}</h3>
+                  <h3 className="member-name">{member.name || 'Okänd medlem'}</h3>
                   {member.acf?.company && <p className="member-company">{member.acf.company}</p>}
                   <p className="member-bio">
                     {member.acf?.bio || 'Läs mer om denna medlem och företaget.'}
@@ -202,7 +202,7 @@ function MembersTab() {
                     type="button"
                     className="btn-read-more"
                     onClick={() => setSelectedMember(member)}
-                    aria-label={`Read more about ${member.name || 'this member'}`}
+                    aria-label={`Läs mer om ${member.name || 'denna medlem'}`}
                   >
                     Läs mer
                   </button>

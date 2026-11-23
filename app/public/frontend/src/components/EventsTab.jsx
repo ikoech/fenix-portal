@@ -116,7 +116,7 @@ function EventsTab({ user, onRequireLogin }) {
       onRequireLogin()
       return
     }
-    if (!window.confirm('Would you like to cancel your signup for this event?')) return
+    if (!window.confirm('Vill du avboka din anmälan till detta event?')) return
     setBusy(eventId)
     setError(null)
     try {
@@ -168,7 +168,7 @@ function EventsTab({ user, onRequireLogin }) {
     e.preventDefault()
     setFormMessage('')
     if (!newTitle || !newDate) {
-      setFormMessage('Title and date are required.')
+      setFormMessage('Titel och datum är obligatoriska.')
       return
     }
 
@@ -187,15 +187,15 @@ function EventsTab({ user, onRequireLogin }) {
           acf: {
             event_date: formattedDate,
             event_time: newTime || '',
-            location: newLocation || 'TBD',
+            location: newLocation || 'Ej bestämt',
             max_attendees: newMaxAttendees || '',
             image_url: newImageUrl || '',
             description: newDescription || ''
           }
         })
       })
-      if (!res.ok) throw new Error('Failed to create event')
-      setFormMessage('Event created successfully!')
+      if (!res.ok) throw new Error('Kunde inte skapa eventet.')
+      setFormMessage('Eventet har skapats!')
       setNewTitle('')
       setNewDate('')
       setNewTime('')
@@ -210,13 +210,13 @@ function EventsTab({ user, onRequireLogin }) {
         (b.acf?.event_date || '').localeCompare(a.acf?.event_date || '')
       ))
     } catch (err) {
-      setFormMessage('Creation failed: ' + err.message)
+      setFormMessage('Kunde inte skapa eventet: ' + err.message)
     }
   }
 
   // Helper to parse date string into parts for display
   function getDateParts(dateStr) {
-    if (!dateStr) return { day: '?', month: 'TBD', year: '' }
+    if (!dateStr) return { day: '?', month: 'EJ FASTSTÄLLT', year: '' }
     let y, m, d
     if (dateStr.includes('-')) {
       const parts = dateStr.split('-')
@@ -224,7 +224,7 @@ function EventsTab({ user, onRequireLogin }) {
     } else if (dateStr.length >= 8) {
       y = dateStr.substring(0, 4); m = dateStr.substring(4, 6); d = dateStr.substring(6, 8)
     } else {
-      return { day: '?', month: 'TBD', year: '' }
+      return { day: '?', month: 'EJ FASTSTÄLLT', year: '' }
     }
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
     return { day: parseInt(d), month: months[parseInt(m) - 1], year: y }
@@ -233,10 +233,10 @@ function EventsTab({ user, onRequireLogin }) {
   return (
     <section className="events-section">
       <div className="events-header">
-        <h2>Upcoming Events</h2>
+        <h2>Kommande evenemang</h2>
         {isAdmin && (
           <button onClick={() => setShowForm(!showForm)} className="btn-create-event">
-            {showForm ? 'Cancel' : '+ Create Event'}
+            {showForm ? 'Avbryt' : '+ Skapa evenemang'}
           </button>
         )}
       </div>
@@ -244,8 +244,8 @@ function EventsTab({ user, onRequireLogin }) {
       <div className="events-search">
         <input
           type="search"
-          aria-label="Search events"
-          placeholder="Search events by title, description, location, or date..."
+          aria-label="Sök evenemang"
+          placeholder="Sök evenemang efter titel, beskrivning, plats eller datum..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -253,47 +253,47 @@ function EventsTab({ user, onRequireLogin }) {
 
       {isAdmin && showForm && (
         <form onSubmit={handleCreateEvent} className="event-create-form">
-          <h3>Create a New Event</h3>
+          <h3>Skapa ett nytt evenemang</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Title *</label>
-              <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g., Annual Meeting" required />
+              <label>Titel *</label>
+              <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="t.ex. Årsmöte" required />
             </div>
             <div className="form-group">
-              <label>Date *</label>
+              <label>Datum *</label>
               <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} required />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Time</label>
+              <label>Tid</label>
               <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Location</label>
-              <input type="text" value={newLocation} onChange={e => setNewLocation(e.target.value)} placeholder="e.g., Stockholm, Sweden" />
+              <label>Plats</label>
+              <input type="text" value={newLocation} onChange={e => setNewLocation(e.target.value)} placeholder="t.ex. Stockholm" />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Max Attendees</label>
-              <input type="number" value={newMaxAttendees} onChange={e => setNewMaxAttendees(e.target.value)} placeholder="e.g., 50" />
+              <label>Max antal deltagare</label>
+              <input type="number" value={newMaxAttendees} onChange={e => setNewMaxAttendees(e.target.value)} placeholder="t.ex. 50" />
             </div>
             <div className="form-group">
-              <label>Image URL</label>
+              <label>Bild-URL</label>
               <input type="text" value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} placeholder="https://..." />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>Beskrivning</label>
               <textarea
                 value={newDescription}
                 onChange={e => setNewDescription(e.target.value)}
-                placeholder="Event description..."
+                placeholder="Beskrivning av evenemanget..."
                 rows={3}
               />
             </div>
           </div>
-          <button type="submit" className="btn-create">Create Event</button>
+          <button type="submit" className="btn-create">Skapa evenemang</button>
           {formMessage && <p className="form-message">{formMessage}</p>}
         </form>
       )}
@@ -301,9 +301,9 @@ function EventsTab({ user, onRequireLogin }) {
       {error && <p className="error-msg">{error}</p>}
 
       {events.length === 0 ? (
-        <p>No events found.</p>
+        <p>Inga evenemang hittades.</p>
       ) : filteredEvents.length === 0 ? (
-        <p className="events-empty">No events match your search.</p>
+        <p className="events-empty">Inga evenemang matchar din sökning.</p>
       ) : (
         <div className="events-grid">
           {filteredEvents.map(event => {
@@ -314,8 +314,8 @@ function EventsTab({ user, onRequireLogin }) {
             const myGuests = (attendees[event.id] || []).filter(person => person.type === 'guest' && person.signup_id === isSignedUp)
             const maxNum = parseInt(event.acf?.max_attendees, 10)
             const isFull = !isNaN(maxNum) && maxNum > 0 && currentCount >= maxNum
-            const location = event.acf?.location || 'TBD'
-            const maxAttendees = event.acf?.max_attendees || 'N/A'
+            const location = event.acf?.location || 'Ej bestämt'
+            const maxAttendees = event.acf?.max_attendees || 'Ej angivet'
             const eventTime = event.acf?.event_time || ''
             const imageUrl = event.acf?.image_url || null
 
@@ -345,29 +345,29 @@ function EventsTab({ user, onRequireLogin }) {
                     {eventTime && <p className="event-time">🕐 {eventTime}</p>}
                     <p className="event-location">📍 {location}</p>
                     <p className="event-meta">
-                      Max Attendees: {maxAttendees}{user ? ` · ${currentCount} deltagare · ${eventBreakdown.members} medlemmar, ${eventBreakdown.guests} gäster` : ''}
+                      Max antal deltagare: {maxAttendees}{user ? ` · ${currentCount} deltagare · ${eventBreakdown.members} medlemmar, ${eventBreakdown.guests} gäster` : ''}
                     </p>
                     <p className="event-full-date">{formatACFDate(event.acf?.event_date)}</p>
 
                     {user && isSignedUp ? (
                       <div className="signed-up-row">
-                        <span className="signed-up-badge">✓ Signed Up</span>
+                        <span className="signed-up-badge">✓ Anmäld</span>
                         <button
                           className="btn-cancel-link"
                           disabled={busy === event.id}
                           onClick={() => handleCancelSignup(event.id)}
                         >
-                          {busy === event.id ? 'Cancelling…' : 'Cancel'}
+                          {busy === event.id ? 'Avbokar…' : 'Avboka'}
                         </button>
                       </div>
                     ) : isFull ? (
-                      <span className="event-full-badge">Event Full</span>
+                      <span className="event-full-badge">Fullbokat</span>
                     ) : !user ? (
                       <button
                         className="btn-signup"
                         onClick={onRequireLogin}
                       >
-                        Log in to sign up →
+                        Logga in för att anmäla dig →
                       </button>
                     ) : (
                       <button
@@ -375,7 +375,7 @@ function EventsTab({ user, onRequireLogin }) {
                         disabled={busy === event.id}
                         onClick={() => handleSignup(event.id)}
                       >
-                        {busy === event.id ? 'Signing up…' : 'Sign Up →'}
+                        {busy === event.id ? 'Anmäler…' : 'Anmäl dig →'}
                       </button>
                     )}
                   </div>
@@ -398,7 +398,7 @@ function EventsTab({ user, onRequireLogin }) {
                       <input id={`guest-company-${event.id}`} maxLength={200} value={guestCompanies[event.id] || ''} onChange={e => setGuestCompanies(prev => ({ ...prev, [event.id]: e.target.value }))} />
                       <button className="btn-signup" disabled={busy !== null} type="submit">Lägg till gäst</button>
                     </form>
-                    <small>Gästen väntar på administratörsgodkännande innan platsen räknas.</small>
+                    <small>Gästen läggs direkt till och räknas som en deltagare.</small>
                   </div>
                 )}
               </article>

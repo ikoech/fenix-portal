@@ -83,7 +83,7 @@ function AdminTab({ user }) {
   }
   // Handle delete actions
   const handleDeleteMember = (userId) => {
-    if (window.confirm('Are you sure you want to delete this member? Their authored content will also be deleted.')) {
+    if (window.confirm('Är du säker på att du vill ta bort den här medlemmen? Även innehåll som medlemmen har skapat tas bort.')) {
       deleteMember(sessionStorage.getItem('fenix_auth'), userId)
         .then(() => {
           setMembers(members.filter(m => m.id !== userId))
@@ -93,7 +93,7 @@ function AdminTab({ user }) {
   }
   // Handle delete actions
   const handleDeleteEvent = (eventId) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm('Är du säker på att du vill ta bort detta evenemang?')) {
       deleteEvent(sessionStorage.getItem('fenix_auth'), eventId)
         .then(() => {
           setEvents(events.filter(e => e.id !== eventId))
@@ -147,33 +147,33 @@ function AdminTab({ user }) {
     const username = newMember.username.trim()
     const email = newMember.email.trim()
     if (!name) {
-      reportValidationError('Name is required.')
+      reportValidationError('Namn är obligatoriskt.')
       return
     }
     if (!username) {
-      reportValidationError('Username is required.')
+      reportValidationError('Användarnamn är obligatoriskt.')
       return
     }
     if (username.length > 60 || !/^[a-zA-Z0-9_.-]+$/.test(username)) {
-      reportValidationError('Username must be 1-60 characters and contain only letters, numbers, dots, underscores, or hyphens.')
+      reportValidationError('Användarnamnet måste vara 1–60 tecken och får endast innehålla bokstäver, siffror, punkter, understreck eller bindestreck.')
       return
     }
     if (!email) {
-      reportValidationError('Email is required.')
+      reportValidationError('E-postadress är obligatorisk.')
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      reportValidationError('Enter a valid email address.')
+      reportValidationError('Ange en giltig e-postadress.')
       return
     }
     if (newMember.password.length < 8) {
-      reportValidationError('Password must be at least 8 characters.')
+      reportValidationError('Lösenordet måste innehålla minst 8 tecken.')
       return
     }
     // Check for existing username or email
     const authHeader = sessionStorage.getItem('fenix_auth')
     if (!authHeader) {
-      reportValidationError('Your admin session has expired. Please sign in again.')
+      reportValidationError('Administratörssessionen har gått ut. Logga in igen.')
       return
     }
 
@@ -196,7 +196,7 @@ function AdminTab({ user }) {
 
       const created = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(created?.message || `Failed to create member (${res.status})`)
+        throw new Error(created?.message || `Kunde inte skapa medlemmen (${res.status})`)
       }
 
       const savedMember = {
@@ -228,7 +228,7 @@ function AdminTab({ user }) {
         })
         profile = await profileRes.json().catch(() => null)
         if (!profileRes.ok) {
-          throw new Error(profile?.message || `request failed (${profileRes.status})`)
+          throw new Error(profile?.message || `Begäran misslyckades (${profileRes.status})`)
         }
       } catch (profileError) {
         setShowAddMember(false)
@@ -244,7 +244,7 @@ function AdminTab({ user }) {
           photo: '',
           linkedin: ''
         })
-        setAddStatus(`Member was created, but profile details could not be saved: ${profileError.message}`)
+        setAddStatus(`Medlemmen skapades, men profiluppgifterna kunde inte sparas: ${profileError.message}`)
         setAddStatusType('error')
         return
       }
@@ -263,10 +263,10 @@ function AdminTab({ user }) {
         photo: '',
         linkedin: ''
       })
-      setAddStatus('Member added successfully! They can log in at the login page.')
+      setAddStatus('Medlemmen har skapats! Hen kan logga in via inloggningssidan.')
       setAddStatusType('success')
     } catch (err) {
-      setAddStatus('Could not add member: ' + err.message)
+      setAddStatus('Kunde inte lägga till medlemmen: ' + err.message)
       setAddStatusType('error')
     } finally {
       setIsAddingMember(false)
@@ -276,21 +276,21 @@ function AdminTab({ user }) {
   if (!isAdmin) {
     return (
       <div className="admin-denied">
-        <h2>Access Denied</h2>
-        <p>You must be an administrator to view this page.</p>
+        <h2>Åtkomst nekad</h2>
+        <p>Du måste vara administratör för att visa den här sidan.</p>
       </div>
     )
   }
 
   return (
     <section className="admin-section">
-      <h2>Admin Dashboard</h2>
+      <h2>Administratörspanel</h2>
       {error && <p className="error-msg">{error}</p>}
 
       <div className="admin-nav">
-        <button className={`admin-tab ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSection('overview')}>Overview</button>
-        <button className={`admin-tab ${activeSection === 'members' ? 'active' : ''}`} onClick={() => setActiveSection('members')}>Members</button>
-        <button className={`admin-tab ${activeSection === 'events' ? 'active' : ''}`} onClick={() => setActiveSection('events')}>Events</button>
+        <button className={`admin-tab ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSection('overview')}>Översikt</button>
+        <button className={`admin-tab ${activeSection === 'members' ? 'active' : ''}`} onClick={() => setActiveSection('members')}>Medlemmar</button>
+        <button className={`admin-tab ${activeSection === 'events' ? 'active' : ''}`} onClick={() => setActiveSection('events')}>Evenemang</button>
         <button className={`admin-tab ${activeSection === 'applications' ? 'active' : ''}`} onClick={() => setActiveSection('applications')}>Ansökningar</button>
       </div>
 
@@ -302,27 +302,27 @@ function AdminTab({ user }) {
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-number">{stats.members}</span>
-              <span className="stat-label">Members</span>
+              <span className="stat-label">Medlemmar</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{stats.events}</span>
-              <span className="stat-label">Events</span>
+              <span className="stat-label">Evenemang</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{stats.signups}</span>
-              <span className="stat-label">Sign-ups</span>
+              <span className="stat-label">Anmälningar</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{stats.deals}</span>
-              <span className="stat-label">TFA Deals</span>
+              <span className="stat-label">TFA-affärer</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{stats.seeking}</span>
-              <span className="stat-label">Seeking Posts</span>
+              <span className="stat-label">Sökta tjänster</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{stats.documents}</span>
-              <span className="stat-label">Documents</span>
+              <span className="stat-label">Dokument</span>
             </div>
           </div>
 
@@ -333,13 +333,13 @@ function AdminTab({ user }) {
       {activeSection === 'members' && (
         <div>
           <div className="admin-section-header">
-            <h3>Members</h3>
+            <h3>Medlemmar</h3>
             {!editingMember && !showAddMember && (
               <button className="btn-admin-save" onClick={() => {
                 setAddStatus('')
                 setAddStatusType('')
                 setShowAddMember(true)
-              }}>+ Add Member</button>
+              }}>+ Lägg till medlem</button>
             )}
           </div>
           {addStatus && (
@@ -350,41 +350,41 @@ function AdminTab({ user }) {
 
           {showAddMember && (
             <form className="admin-edit-form" onSubmit={handleAddMember} noValidate>
-              <h3>Add New Member</h3>
+              <h3>Lägg till ny medlem</h3>
               <div className="form-group">
-                <label htmlFor="new-member-name">Name *</label>
+                <label htmlFor="new-member-name">Namn *</label>
                 <input id="new-member-name" type="text" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })} required />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-username">Username *</label>
+                <label htmlFor="new-member-username">Användarnamn *</label>
                 <input id="new-member-username" type="text" autoComplete="username" maxLength={60} pattern="[A-Za-z0-9_.-]+" value={newMember.username} onChange={e => setNewMember({ ...newMember, username: e.target.value })} required />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-email">Email *</label>
+                <label htmlFor="new-member-email">E-post *</label>
                 <input id="new-member-email" type="email" value={newMember.email} onChange={e => setNewMember({ ...newMember, email: e.target.value })} required />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-password">Password * (min 8 chars)</label>
+                <label htmlFor="new-member-password">Lösenord * (minst 8 tecken)</label>
                 <input id="new-member-password" type="password" autoComplete="new-password" minLength={8} value={newMember.password} onChange={e => setNewMember({ ...newMember, password: e.target.value })} required />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-company">Company</label>
+                <label htmlFor="new-member-company">Företag</label>
                 <input id="new-member-company" value={newMember.company} onChange={e => setNewMember({ ...newMember, company: e.target.value })} />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-phone">Phone</label>
+                <label htmlFor="new-member-phone">Telefon</label>
                 <input id="new-member-phone" type="tel" value={newMember.phone} onChange={e => setNewMember({ ...newMember, phone: e.target.value })} />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-bio">Bio</label>
+                <label htmlFor="new-member-bio">Presentation</label>
                 <textarea id="new-member-bio" rows={3} value={newMember.bio} onChange={e => setNewMember({ ...newMember, bio: e.target.value })} />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-interests">Interests</label>
+                <label htmlFor="new-member-interests">Intressen</label>
                 <input id="new-member-interests" value={newMember.interests} onChange={e => setNewMember({ ...newMember, interests: e.target.value })} />
               </div>
               <div className="form-group">
-                <label htmlFor="new-member-photo">Photo URL</label>
+                <label htmlFor="new-member-photo">Bild-URL</label>
                 <input id="new-member-photo" type="url" value={newMember.photo} onChange={e => setNewMember({ ...newMember, photo: e.target.value })} placeholder="https://..." />
               </div>
               <div className="form-group">
@@ -393,13 +393,13 @@ function AdminTab({ user }) {
               </div>
               <div className="form-buttons">
                 <button type="submit" className="btn-admin-save" disabled={isAddingMember}>
-                  {isAddingMember ? 'Creating...' : 'Create Member'}
+                  {isAddingMember ? 'Skapar...' : 'Skapa medlem'}
                 </button>
                 <button type="button" className="btn-admin-cancel" disabled={isAddingMember} onClick={() => {
                   setShowAddMember(false)
                   setAddStatus('')
                   setAddStatusType('')
-                }}>Cancel</button>
+                }}>Avbryt</button>
               </div>
             </form>
           )}
@@ -408,10 +408,10 @@ function AdminTab({ user }) {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Company</th>
-                  <th>Email</th>
-                  <th>Actions</th>
+                  <th>Namn</th>
+                  <th>Företag</th>
+                  <th>E-post</th>
+                  <th>Åtgärder</th>
                 </tr>
               </thead>
               <tbody>
@@ -421,8 +421,8 @@ function AdminTab({ user }) {
                     <td>{(Array.isArray(m.acf) ? {} : m.acf)?.company || '—'}</td>
                     <td>{m.email || '—'}</td>
                     <td>
-                      <button onClick={() => handleEditMember(m)} className="btn-admin-edit">Edit</button>
-                      <button onClick={() => handleDeleteMember(m.id)} className="btn-admin-delete">Delete</button>
+                      <button onClick={() => handleEditMember(m)} className="btn-admin-edit">Redigera</button>
+                      <button onClick={() => handleDeleteMember(m.id)} className="btn-admin-delete">Ta bort</button>
                     </td>
                   </tr>
                 ))}
@@ -435,25 +435,25 @@ function AdminTab({ user }) {
       {/* Events list */}
       {activeSection === 'events' && (
         <div>
-          <h3>Events</h3>
+          <h3>Evenemang</h3>
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Event</th>
-                <th>Location</th>
-                <th>Max Attendees</th>
-                <th>Actions</th>
+                <th>Evenemang</th>
+                <th>Plats</th>
+                <th>Max antal deltagare</th>
+                <th>Åtgärder</th>
               </tr>
             </thead>
             <tbody>
               {events.map(ev => (
                 <tr key={ev.id}>
                   <td>{ev.title?.rendered}</td>
-                  <td>{ev.acf?.location || 'TBD'}</td>
-                  <td>{ev.acf?.max_attendees || 'N/A'}</td>
+                  <td>{ev.acf?.location || 'Ej bestämt'}</td>
+                  <td>{ev.acf?.max_attendees || 'Ej angivet'}</td>
                   <td>
-                    <button onClick={() => handleEditEvent(ev)} className="btn-admin-edit">Edit</button>
-                    <button onClick={() => handleDeleteEvent(ev.id)} className="btn-admin-delete">Delete</button>
+                    <button onClick={() => handleEditEvent(ev)} className="btn-admin-edit">Redigera</button>
+                    <button onClick={() => handleDeleteEvent(ev.id)} className="btn-admin-delete">Ta bort</button>
                   </td>
                 </tr>
               ))}
@@ -465,10 +465,10 @@ function AdminTab({ user }) {
       {/* Edit Member Form */}
       {editingMember && (
         <div className="admin-edit-form">
-          <h3>Edit Member: {editingMember.name}</h3>
+          <h3>Redigera medlem: {editingMember.name}</h3>
           <form onSubmit={(e) => handleUpdateMember(e, editingMember.id)}>
             <div className="form-group">
-              <label>Name</label>
+              <label>Namn</label>
               <input
                 type="text"
                 value={editingMember.name || ''}
@@ -476,7 +476,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Email</label>
+              <label>E-post</label>
               <input
                 type="email"
                 value={editingMember.email || ''}
@@ -484,7 +484,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Company</label>
+              <label>Företag</label>
               <input
                 type="text"
                 value={editingMember.acf?.company || ''}
@@ -492,7 +492,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Phone</label>
+              <label>Telefon</label>
               <input
                 type="text"
                 value={editingMember.acf?.phone || ''}
@@ -500,21 +500,21 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Bio</label>
+              <label>Presentation</label>
               <textarea
                 value={editingMember.acf?.bio || ''}
                 onChange={e => setEditingMember({...editingMember, acf: {...editingMember.acf, bio: e.target.value}})}
               />
             </div>
             <div className="form-group">
-              <label>Interests</label>
+              <label>Intressen</label>
               <input
                 value={editingMember.acf?.interests || ''}
                 onChange={e => setEditingMember({...editingMember, acf: {...editingMember.acf, interests: e.target.value}})}
               />
             </div>
             <div className="form-group">
-              <label>Photo URL</label>
+              <label>Bild-URL</label>
               <input
                 value={editingMember.acf?.photo || ''}
                 onChange={e => setEditingMember({...editingMember, acf: {...editingMember.acf, photo: e.target.value}})}
@@ -530,8 +530,8 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-buttons">
-              <button type="submit" className="btn-admin-save">Save</button>
-              <button type="button" onClick={() => setEditingMember(null)} className="btn-admin-cancel">Cancel</button>
+              <button type="submit" className="btn-admin-save">Spara</button>
+              <button type="button" onClick={() => setEditingMember(null)} className="btn-admin-cancel">Avbryt</button>
             </div>
           </form>
         </div>
@@ -540,10 +540,10 @@ function AdminTab({ user }) {
       {/* Edit Event Form */}
       {editingEvent && (
         <div className="admin-edit-form">
-          <h3>Edit Event: {editingEvent.title?.rendered}</h3>
+          <h3>Redigera evenemang: {editingEvent.title?.rendered}</h3>
           <form onSubmit={(e) => handleUpdateEvent(e, editingEvent.id)}>
             <div className="form-group">
-              <label>Title</label>
+              <label>Titel</label>
               <input
                 type="text"
                 value={editingEvent.title?.rendered || ''}
@@ -551,7 +551,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Date (YYYYMMDD)</label>
+              <label>Datum (ÅÅÅÅMMDD)</label>
               <input
                 type="text"
                 value={editingEvent.acf?.event_date || ''}
@@ -560,7 +560,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Time</label>
+              <label>Tid</label>
               <input
                 type="time"
                 value={editingEvent.acf?.event_time || ''}
@@ -568,7 +568,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Location</label>
+              <label>Plats</label>
               <input
                 type="text"
                 value={editingEvent.acf?.location || ''}
@@ -576,7 +576,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Max Attendees</label>
+              <label>Max antal deltagare</label>
               <input
                 type="number"
                 value={editingEvent.acf?.max_attendees || ''}
@@ -584,7 +584,7 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>Beskrivning</label>
               <textarea
                 value={editingEvent.acf?.description || ''}
                 onChange={e => setEditingEvent({...editingEvent, acf: {...editingEvent.acf, description: e.target.value}})}
@@ -592,8 +592,8 @@ function AdminTab({ user }) {
               />
             </div>
             <div className="form-buttons">
-              <button type="submit" className="btn-admin-save">Save</button>
-              <button type="button" onClick={() => setEditingEvent(null)} className="btn-admin-cancel">Cancel</button>
+              <button type="submit" className="btn-admin-save">Spara</button>
+              <button type="button" onClick={() => setEditingEvent(null)} className="btn-admin-cancel">Avbryt</button>
             </div>
           </form>
         </div>

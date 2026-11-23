@@ -67,8 +67,8 @@ function Header({
         {((user && showTabs) || (!user && showPublicTabs)) && (
           <nav className={`tabs${user ? '' : ' tabs--public'}`}>
             <button className={`tab ${activeTab === 'start' ? 'active' : ''}`} onClick={() => setActiveTab('start')}>Start</button>
-            <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Events</button>
-            <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Members</button>
+            <button className={`tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>Evenemang</button>
+            <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>Medlemmar</button>
             <button className={`tab ${activeTab === 'application' ? 'active' : ''}`} onClick={() => setActiveTab('application')}>Bli medlem</button>
             {user ? (
               <>
