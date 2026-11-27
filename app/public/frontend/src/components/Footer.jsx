@@ -55,9 +55,6 @@ function Footer() {
                 <a href="/portal?tab=members">Medlemmar</a>
               </li>
               <li>
-                <a href="/om-fenix">Om Fenix</a>
-              </li>
-              <li>
                 <a href="?tab=integrity-policy">Integritetspolicy</a>
               </li>
               <li>
@@ -70,7 +67,7 @@ function Footer() {
             <h3>Information</h3>
             <ul>
               <li>
-                <a href="/artiklar">Artiklar</a>
+                <a href="/om-fenix">Om Fenix</a>
               </li>
               <li>
                 <a href="/portal?tab=contact">Kontakta oss</a>

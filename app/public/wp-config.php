@@ -81,7 +81,11 @@ define( 'WP_CACHE_KEY_SALT', '*[73tur7eQ.yfo?]Tb%,t,ZdpXg}p]>,__Qa(SQ7VA0_#uy+!<
 $table_prefix = 'wp_';
 
 /* Add any custom values between this line and the "stop editing" line. */
-
+define( 'FLUENTMAIL_SMTP_USERNAME', 'info@natverketfenix.se' );
+define( 'FLUENTMAIL_SMTP_PASSWORD', 'Q12G&amp;fhjlb87' );
+// Optional: use these credentials only with this host and port
+define( 'FLUENTMAIL_SMTP_HOST', 'mail.inleed.com' );
+define( 'FLUENTMAIL_SMTP_PORT', '465' );
 
 define('JWT_AUTH_SECRET_KEY', 'OmHM uF9H NLaP aVzt Od2u Cwoc');
 /**

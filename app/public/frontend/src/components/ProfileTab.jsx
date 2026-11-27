@@ -14,7 +14,16 @@ function copyProfile(profile) {
 }
 // Get the display role for the profile
 function getRole(profile) {
-  const role = profile.acf?.role || profile.roles?.join(', ')
+  if (profile.acf?.role) return profile.acf.role
+
+  const labels = {
+    administrator: 'Administratör',
+    editor: 'Redaktör',
+    author: 'Författare',
+    contributor: 'Medarbetare',
+    subscriber: 'Medlem'
+  }
+  const role = profile.roles?.map(value => labels[value] || value).join(', ')
   return role || 'Välj en roll'
 }
 
@@ -42,7 +51,7 @@ function ProfileTab({ user, onPasswordChanged }) {
 
       if (!authHeader) {
         if (isCurrent) {
-          setError('Not logged in — please log in.')
+          setError('Du är inte inloggad. Logga in och försök igen.')
           setLoading(false)
         }
         return
@@ -54,7 +63,7 @@ function ProfileTab({ user, onPasswordChanged }) {
           headers: { Authorization: authHeader }
         })
         if (!res.ok) {
-          throw new Error(`Could not load profile (${res.status})`)
+          throw new Error(`Kunde inte hämta profilen (${res.status})`)
         }
 
         const data = await res.json()
@@ -65,7 +74,7 @@ function ProfileTab({ user, onPasswordChanged }) {
         }
       } catch (err) {
         if (isCurrent) {
-          setError(err instanceof Error ? err.message : 'Could not load profile.')
+          setError(err instanceof Error ? err.message : 'Kunde inte hämta profilen.')
         }
       } finally {
         if (isCurrent) setLoading(false)
@@ -106,11 +115,11 @@ function ProfileTab({ user, onPasswordChanged }) {
     const authHeader = sessionStorage.getItem('fenix_auth')
 
     if (!authHeader) {
-      setError('Not logged in — please log in.')
+      setError('Du är inte inloggad. Logga in och försök igen.')
       return
     }
     if (!profile) {
-      setError('Profile is not available. Please reload and try again.')
+      setError('Profilen är inte tillgänglig. Ladda om sidan och försök igen.')
       return
     }
 
@@ -127,9 +136,9 @@ function ProfileTab({ user, onPasswordChanged }) {
       setProfile(updatedProfile)
       setSavedProfile(copyProfile(updatedProfile))
       setEditMode(false)
-      setSuccess('Profile updated!')
+      setSuccess('Profilen har uppdaterats!')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not update profile.')
+      setError(err instanceof Error ? err.message : 'Kunde inte uppdatera profilen.')
     } finally {
       setSaving(false)
     }
@@ -141,13 +150,13 @@ function ProfileTab({ user, onPasswordChanged }) {
     setPasswordError('')
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('The new passwords do not match.')
+      setPasswordError('De nya lösenorden matchar inte.')
       return
     }
 
     const authHeader = sessionStorage.getItem('fenix_auth')
     if (!authHeader) {
-      setPasswordError('Not logged in — please log in.')
+      setPasswordError('Du är inte inloggad. Logga in och försök igen.')
       return
     }
 
@@ -159,20 +168,20 @@ function ProfileTab({ user, onPasswordChanged }) {
       setConfirmPassword('')
       onPasswordChanged()
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : 'Could not change password.')
+      setPasswordError(err instanceof Error ? err.message : 'Kunde inte byta lösenord.')
     } finally {
       setChangingPassword(false)
     }
   }
 
   if (loading) {
-    return <p className="profile-loading">Loading profile...</p>
+    return <p className="profile-loading">Laddar profil...</p>
   }
 
   if (error && !profile) {
     return (
       <section className="profile-section">
-        <h2>My Profile</h2>
+        <h2>Min profil</h2>
         <p className="error-msg" role="alert">{error}</p>
       </section>
     )
@@ -181,8 +190,8 @@ function ProfileTab({ user, onPasswordChanged }) {
   if (!profile) {
     return (
       <section className="profile-section">
-        <h2>My Profile</h2>
-        <p className="error-msg" role="alert">Profile is not available. Please reload and try again.</p>
+        <h2>Min profil</h2>
+        <p className="error-msg" role="alert">Profilen är inte tillgänglig. Ladda om sidan och försök igen.</p>
       </section>
     )
   }
@@ -191,14 +200,14 @@ function ProfileTab({ user, onPasswordChanged }) {
 
   return (
     <section className="profile-section">
-      <h2>{editMode ? 'Edit Profile' : 'My Profile'}</h2>
+      <h2>{editMode ? 'Redigera profil' : 'Min profil'}</h2>
       {error && <p className="error-msg" role="alert">{error}</p>}
       {success && <p className="success-msg" role="status">{success}</p>}
 
       {editMode ? (
         <form className="profile-form" onSubmit={saveProfile}>
           <div className="form-group">
-            <label htmlFor="profile-name">Name</label>
+            <label htmlFor="profile-name">Namn</label>
             <input
               id="profile-name"
               type="text"
@@ -208,7 +217,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-email">Email</label>
+            <label htmlFor="profile-email">E-post</label>
             <input
               id="profile-email"
               type="email"
@@ -218,7 +227,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-company">Company</label>
+            <label htmlFor="profile-company">Företag</label>
             <input
               id="profile-company"
               type="text"
@@ -227,7 +236,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-phone">Phone</label>
+            <label htmlFor="profile-phone">Telefon</label>
             <input
               id="profile-phone"
               type="tel"
@@ -236,7 +245,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-bio">Bio</label>
+            <label htmlFor="profile-bio">Om mig</label>
             <textarea
               id="profile-bio"
               value={acf.bio || ''}
@@ -245,7 +254,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-interests">Interests</label>
+            <label htmlFor="profile-interests">Intressen</label>
             <textarea
               id="profile-interests"
               value={acf.interests || ''}
@@ -287,7 +296,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-photo">Photo URL</label>
+            <label htmlFor="profile-photo">Länk till foto</label>
             <input
               id="profile-photo"
               type="url"
@@ -297,7 +306,7 @@ function ProfileTab({ user, onPasswordChanged }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="profile-linkedin">LinkedIn URL</label>
+            <label htmlFor="profile-linkedin">LinkedIn-länk</label>
             <input
               id="profile-linkedin"
               type="url"
@@ -308,7 +317,7 @@ function ProfileTab({ user, onPasswordChanged }) {
           </div>
           <div className="form-actions">
             <button type="submit" className="btn-save-profile" disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? 'Sparar...' : 'Spara'}
             </button>
             <button
               type="button"
@@ -316,7 +325,7 @@ function ProfileTab({ user, onPasswordChanged }) {
               onClick={cancelEdit}
               disabled={saving}
             >
-              Cancel
+              Avbryt
             </button>
           </div>
         </form>
@@ -324,47 +333,47 @@ function ProfileTab({ user, onPasswordChanged }) {
         <div className="profile-card">
           <div className="profile-photo-wrap">
             {(acf.photo || acf.avatar_url) ? (
-              <img src={acf.photo || acf.avatar_url} alt={`${profile.name || 'User'} profile`} className="profile-photo" />
+              <img src={acf.photo || acf.avatar_url} alt={`Profilbild för ${profile.name || 'användaren'}`} className="profile-photo" />
             ) : (
-              <div className="profile-avatar" aria-label="Profile photo placeholder">
+              <div className="profile-avatar" aria-label="Platshållare för profilbild">
                 {(profile.name || 'U').charAt(0).toUpperCase()}
               </div>
             )}
           </div>
-          <h3 className="profile-name">{profile.name || 'Not set'}</h3>
+          <h3 className="profile-name">{profile.name || 'Inte angivet'}</h3>
           <p className="profile-role">{getRole(profile)}</p>
-          <p className="profile-company">{acf.company || 'Not set'}</p>
+          <p className="profile-company">{acf.company || 'Inte angivet'}</p>
 
           <table className="profile-table">
             <tbody>
-              <tr><th scope="row">Email</th><td>{profile.email || 'Not set'}</td></tr>
-              <tr><th scope="row">Phone</th><td>{acf.phone || 'Not set'}</td></tr>
-              <tr><th scope="row">Bio</th><td>{acf.bio || 'Not set'}</td></tr>
-              <tr><th scope="row">Interests</th><td>{acf.interests || 'Not set'}</td></tr>
-              <tr><th scope="row">Är bra på</th><td className="profile-multiline">{acf.expertise || 'Not set'}</td></tr>
-              <tr><th scope="row">Specifika sök</th><td className="profile-multiline">{acf.specific_search || 'Not set'}</td></tr>
-              <tr><th scope="row">Ersättare</th><td>{acf.deputy || 'Not set'}</td></tr>
+              <tr><th scope="row">E-post</th><td>{profile.email || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Telefon</th><td>{acf.phone || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Om mig</th><td>{acf.bio || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Intressen</th><td>{acf.interests || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Är bra på</th><td className="profile-multiline">{acf.expertise || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Specifika sök</th><td className="profile-multiline">{acf.specific_search || 'Inte angivet'}</td></tr>
+              <tr><th scope="row">Ersättare</th><td>{acf.deputy || 'Inte angivet'}</td></tr>
               <tr>
                 <th scope="row">LinkedIn</th>
                 <td>
                   {acf.linkedin ? (
                     <a href={acf.linkedin} target="_blank" rel="noopener noreferrer">{acf.linkedin}</a>
-                  ) : 'Not set'}
+                  ) : 'Inte angivet'}
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <button type="button" className="btn-edit-profile" onClick={startEdit}>Edit Profile</button>
+          <button type="button" className="btn-edit-profile" onClick={startEdit}>Redigera profil</button>
         </div>
       )}
 
       <form className="password-form" onSubmit={savePassword}>
-        <h3>Change password</h3>
-        <p>After changing your password, you’ll need to sign in again.</p>
+        <h3>Byt lösenord</h3>
+        <p>När du har bytt lösenord behöver du logga in igen.</p>
         {passwordError && <p className="error-msg" role="alert">{passwordError}</p>}
         <div className="form-group">
-          <label htmlFor="profile-current-password">Current password</label>
+          <label htmlFor="profile-current-password">Nuvarande lösenord</label>
           <input
             id="profile-current-password"
             type="password"
@@ -375,7 +384,7 @@ function ProfileTab({ user, onPasswordChanged }) {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="profile-new-password">New password (at least 8 characters)</label>
+          <label htmlFor="profile-new-password">Nytt lösenord (minst 8 tecken)</label>
           <input
             id="profile-new-password"
             type="password"
@@ -387,7 +396,7 @@ function ProfileTab({ user, onPasswordChanged }) {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="profile-confirm-password">Confirm new password</label>
+          <label htmlFor="profile-confirm-password">Bekräfta nytt lösenord</label>
           <input
             id="profile-confirm-password"
             type="password"
@@ -399,7 +408,7 @@ function ProfileTab({ user, onPasswordChanged }) {
           />
         </div>
         <button type="submit" className="btn-save-profile" disabled={changingPassword}>
-          {changingPassword ? 'Changing...' : 'Change password'}
+          {changingPassword ? 'Byter...' : 'Byt lösenord'}
         </button>
       </form>
     </section>

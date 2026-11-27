@@ -59,8 +59,8 @@ function Header({
 
         {user && (
           <div className="user-bar">
-            <span>Welcome, <strong>{user.name}</strong></span>
-            <button onClick={onLogout} className="btn-logout">Log out</button>
+            <span>Välkommen, <strong>{user.name}</strong></span>
+            <button onClick={onLogout} className="btn-logout">Logga ut</button>
           </div>
         )}
 
@@ -75,7 +75,7 @@ function Header({
                 {isAdmin && (
                   <button className={`tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Admin</button>
                 )}
-                <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>My Profile</button>
+                <button className={`tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>Min profil</button>
               </>
             ) : null}
             <div className="header-menu" ref={menuRef}>

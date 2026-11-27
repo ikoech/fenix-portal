@@ -92,7 +92,7 @@ function App() {
 
   const handlePasswordChanged = () => {
     handleLogout()
-    setLoginNotice('Your password has been changed. Please sign in with your new password.')
+    setLoginNotice('Ditt lösenord har ändrats. Logga in med ditt nya lösenord.')
     setShowLogin(true)
   }
 

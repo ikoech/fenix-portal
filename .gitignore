@@ -13,6 +13,7 @@ frontend/dist/
 
 # Locally installed WordPress plugins
 app/public/wp-content/plugins/jwt-authentication-for-wp-rest-api/
+app/public/wp-content/plugins/fluent-smtp/
 
 # OS junk
 Thumbs.db

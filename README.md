@@ -24,6 +24,13 @@ business logic are written from scratch — no member-portal plugins are used.
 - **WordPress + ACF + CPT UI** — content modelling and REST API generation
 - **React (Vite)** — frontend SPA *(in progress)*
 
+### Membership application email
+
+New membership applications are sent to `FENIX_APPLICATION_ADMIN_EMAIL`, which
+defaults to `info@natverketfenix.se`. Configure and test email delivery in the
+FluentSMTP plugin settings; the application plugin does not override its SMTP
+configuration.
+
 ## Installation
 
 1. Install [LocalWP](https://localwp.com)

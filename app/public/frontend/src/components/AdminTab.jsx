@@ -292,6 +292,9 @@ function AdminTab({ user }) {
         <button className={`admin-tab ${activeSection === 'members' ? 'active' : ''}`} onClick={() => setActiveSection('members')}>Medlemmar</button>
         <button className={`admin-tab ${activeSection === 'events' ? 'active' : ''}`} onClick={() => setActiveSection('events')}>Evenemang</button>
         <button className={`admin-tab ${activeSection === 'applications' ? 'active' : ''}`} onClick={() => setActiveSection('applications')}>Ansökningar</button>
+        <a className="admin-tab admin-email-link" href="https://mail.inleed.com" target="_blank" rel="noopener noreferrer">
+          Läs e-post
+        </a>
       </div>
 
       {activeSection === 'applications' && <ApplicationsAdmin />}
