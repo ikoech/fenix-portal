@@ -68,9 +68,31 @@
 .signup-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .signup-panel-header h2{margin-bottom:.2rem}
 .signup-panel-header .ev-meta{margin:0}
-.signup-download-actions{display:flex;gap:.5rem;flex-shrink:0;flex-wrap:wrap}
-.download-signups{border:1px solid #0f8b8d;background:#fff;color:#0f8b8d;border-radius:6px;padding:.4rem .65rem;cursor:pointer;white-space:nowrap}
+.signup-download-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:.55rem;
+  margin:.9rem 0 1rem;
+  padding:.75rem;
+  background:#f2f8f8;
+  border:1px solid #d5e7e8;
+  border-radius:8px;
+}
+.download-signups{
+  border:1px solid #0f8b8d;
+  background:#fff;
+  color:#0f8b8d;
+  border-radius:6px;
+  padding:.55rem .7rem;
+  cursor:pointer;
+  white-space:normal;
+  font-weight:600;
+}
 .download-signups:hover{background:#0f8b8d;color:#fff}
+.download-signups--primary{background:#0f8b8d;color:#fff}
+.download-signups--primary:hover{background:#087476}
+.download-signups:disabled{cursor:wait;opacity:.7}
+.download-signups:focus-visible{outline:3px solid rgba(15,139,141,.3);outline-offset:2px}
 .signup-list-heading{font-size:.85rem;color:#5a6b70;margin:1rem 0 .35rem}
 .cancelled-heading{color:#b33a3a}
 .cancelled-list li{color:#777;text-decoration:line-through}

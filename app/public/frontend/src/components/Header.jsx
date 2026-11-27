@@ -81,7 +81,7 @@ function Header({
             <div className="header-menu" ref={menuRef}>
               <button
                 ref={menuButtonRef}
-                className={`tab header-menu-toggle${['directory', 'contact', 'integrity-policy', 'tfa', 'Documents'].includes(activeTab) ? ' active' : ''}`}
+                className={`tab header-menu-toggle${['contact', 'integrity-policy', 'tfa', 'Documents'].includes(activeTab) ? ' active' : ''}`}
                 type="button"
                 aria-label={menuOpen ? 'Close additional navigation options' : 'Open additional navigation options'}
                 aria-expanded={menuOpen}
@@ -97,15 +97,6 @@ function Header({
                 id="header-more-menu"
                 hidden={!menuOpen}
               >
-                {user && (
-                  <button
-                    className={`tab ${activeTab === 'directory' ? 'active' : ''}`}
-                    type="button"
-                    onClick={() => selectTab('directory')}
-                  >
-                    Medlemskatalog
-                  </button>
-                )}
                 <button
                   className={`tab ${activeTab === 'contact' ? 'active' : ''}`}
                   type="button"

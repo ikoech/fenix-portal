@@ -57,8 +57,26 @@ export function buildDirectoryCSV(rows) {
   return '\uFEFF' + [headers, ...data].map(row => row.map(escapeCell).join(',')).join('\r\n')
 }
 
-export function downloadCSV(rows) {
-  const blob = new Blob([buildDirectoryCSV(rows)], { type: 'text/csv;charset=utf-8' })
+export function buildMemberCatalogCSV(members) {
+  const headers = ['Namn', 'Företag', 'Är bra på!', 'Ersättare', 'Specifika sök']
+  const escapeCell = value => {
+    let text = String(value ?? '')
+    const first = text.search(/\S/)
+    if (first >= 0 && '=+-@'.includes(text[first])) text = `${text.slice(0, first)}'${text.slice(first)}`
+    return `"${text.replace(/"/g, '""')}"`
+  }
+  const data = members.map(member => [
+    member.name,
+    member.company,
+    member.expertise,
+    member.deputy,
+    member.specific_search,
+  ])
+  return '\uFEFF' + [headers, ...data].map(row => row.map(escapeCell).join(',')).join('\r\n')
+}
+
+function downloadCsvText(text) {
+  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -71,4 +89,12 @@ export function downloadCSV(rows) {
     link.remove()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
+}
+
+export function downloadCSV(rows) {
+  downloadCsvText(buildDirectoryCSV(rows))
+}
+
+export function downloadMemberCatalogCSV(members) {
+  downloadCsvText(buildMemberCatalogCSV(members))
 }

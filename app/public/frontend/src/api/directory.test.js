@@ -1,6 +1,6 @@
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchMemberDirectory, groupDirectoryRows, buildDirectoryCSV, downloadCSV, filterMembers } from './directory.js'
+import { fetchMemberDirectory, groupDirectoryRows, buildDirectoryCSV, buildMemberCatalogCSV, downloadCSV, filterMembers } from './directory.js'
 
 const originalFetch = globalThis.fetch
 afterEach(() => { globalThis.fetch = originalFetch })
@@ -55,6 +55,14 @@ test('CSV preserves column order, unicode, quotes and multiline fields safely', 
     { type: 'guest', name: 'Gäst', company: 'Gäst AB', guest_name: 'Gäst', guest_email: 'g@example.com', invited_by: 'Åsa, "A"' }
   ])
   assert.equal(csv, '\uFEFF"Namn","Företag","Är bra på!","Ersättare","Specifika sök","Gästnamn","E-post","Inbjuden av"\r\n"Åsa, ""A""","ACME","A\nB","Bo","\'=1+1","","",""\r\n"","","","","","Gäst","g@example.com","Åsa, ""A"""')
+})
+
+test('public member catalog CSV contains only member fields', () => {
+  const csv = buildMemberCatalogCSV([
+    { name: 'Åsa, "A"', company: 'ACME', expertise: 'A\nB', deputy: 'Bo', specific_search: '=1+1' }
+  ])
+  assert.equal(csv, '\uFEFF"Namn","Företag","Är bra på!","Ersättare","Specifika sök"\r\n"Åsa, ""A""","ACME","A\nB","Bo","\'=1+1"')
+  assert.doesNotMatch(csv, /Gästnamn|E-post|Inbjuden av/)
 })
 
 test('download uses a UTF-8 CSV blob and releases its object URL', async () => {

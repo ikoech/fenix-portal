@@ -50,6 +50,66 @@
   box-shadow: 0 0 0 3px rgba(10, 22, 40, 0.1);
 }
 
+.members-catalog-actions {
+  align-items: center;
+  background: #f2f8f8;
+  border: 1px solid #d5e7e8;
+  border-radius: 10px;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin: -12px auto 32px;
+  max-width: 900px;
+  padding: 18px 20px;
+}
+
+.members-catalog-actions > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.members-catalog-actions strong {
+  color: #0f8b8d;
+  font-size: 18px;
+}
+
+.members-catalog-actions span {
+  color: #617174;
+  font-size: 13px;
+}
+
+.members-catalog-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.members-catalog-buttons button {
+  background: #fff;
+  border: 1px solid #0f8b8d;
+  border-radius: 6px;
+  color: #0f8b8d;
+  cursor: pointer;
+  font: inherit;
+  padding: 10px 14px;
+}
+
+.members-catalog-buttons button:hover:not(:disabled) {
+  background: #0f8b8d;
+  color: #fff;
+}
+
+.members-catalog-buttons button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.members-print-catalog {
+  display: none;
+}
+
 .members-grid {
   display: grid;
   gap: 24px;
@@ -295,6 +355,70 @@ p{
 .member-detail-contact > div {
   border-bottom: 1px solid #e7ebee;
   padding: 15px 0;
+}
+
+@media (max-width: 700px) {
+  .members-catalog-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .members-catalog-buttons {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .members-section {
+    max-width: none;
+    padding: 0;
+  }
+
+  .members-section > :not(.members-print-catalog) {
+    display: none !important;
+  }
+
+  .members-print-catalog {
+    display: block;
+    left: 0;
+    position: absolute;
+    top: 0;
+    visibility: visible;
+    width: 100%;
+  }
+
+  .members-print-catalog * {
+    visibility: visible;
+  }
+
+  .members-print-catalog h1 {
+    color: #0f8b8d;
+    font-size: 24pt;
+    margin: 0 0 6pt;
+  }
+
+  .members-print-catalog > p {
+    margin: 0 0 16pt;
+  }
+
+  .members-print-catalog table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .members-print-catalog th,
+  .members-print-catalog td {
+    border: 1px solid #aaa;
+    font-size: 9pt;
+    padding: 5pt;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .members-print-catalog thead th {
+    background: #0f8b8d;
+    color: #fff;
+  }
 }
 
 .member-detail-contact dt {

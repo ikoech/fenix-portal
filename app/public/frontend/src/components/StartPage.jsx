@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchEvents, fetchEventSignupSummary } from '../api/events'
+import { fetchMemberDirectory } from '../api/directory'
 import { WP_API as API } from '../api/config'
 import { parseEventDate as parseAcfDate, selectNextEvent, buildRosterPrintHtml, downloadRosterCSV } from '../utils/eventRoster'
 import { getGuestStatus } from '../utils/guestStatus'
@@ -37,6 +38,7 @@ export default function StartPage({ user }) {
   const [breakdown, setBreakdown] = useState({})
   const [err, setErr] = useState(null)
   const [loaded, setLoaded] = useState(false)
+  const [downloadingWorkbook, setDownloadingWorkbook] = useState(false)
   const [today] = useState(() => {
     const date = new Date()
     date.setHours(0, 0, 0, 0)
@@ -155,6 +157,38 @@ export default function StartPage({ user }) {
     }
   }
 
+  const downloadMeetingList = async () => {
+    if (!currentEvent) return
+
+    const titleDocument = new DOMParser().parseFromString(currentEvent.title?.rendered || 'Möte', 'text/html')
+    const title = titleDocument.documentElement.textContent || 'Möte'
+    const eventDate = parseAcfDate(currentEvent.acf?.event_date)
+    const displayDate = eventDate
+      ? eventDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Inget datum'
+    const auth = sessionStorage.getItem('fenix_auth')
+
+    setDownloadingWorkbook(true)
+    setErr(null)
+    try {
+      const [directory, summary] = await Promise.all([
+        fetchMemberDirectory(auth),
+        fetchEventSignupSummary(auth),
+      ])
+      const { downloadMeetingWorkbook } = await import('../utils/meetingWorkbook')
+      await downloadMeetingWorkbook({
+        title,
+        eventDate: displayDate,
+        members: directory.filter(row => row.type === 'member'),
+        attendees: summary.attendees[currentEvent.id] || [],
+      })
+    } catch (error) {
+      setErr(`Möteslistan kunde inte laddas ner: ${error.message}`)
+    } finally {
+      setDownloadingWorkbook(false)
+    }
+  }
+
   const cards = [
     { label: 'Medlemmar totalt', value: stats.members },
     { label: 'Veckans event', value: stats.week },
@@ -213,21 +247,24 @@ export default function StartPage({ user }) {
               <h2>{currentEvent ? `Deltagare: ${currentEvent.title?.rendered?.replace(/<[^>]*>/g, '')}` : 'Deltagare'}</h2>
               {currentEvent && <p className="ev-meta">{fmtDate(currentEvent.acf?.event_date)}</p>}
             </div>
-            {currentEvent && (
-              <div className="signup-download-actions">
-                <button className="download-signups" type="button" onClick={printSignupList}>
-                  Skriv ut / spara som PDF
-                </button>
-                <button className="download-signups" type="button" onClick={downloadSignupList}>
-                  Ladda ner CSV
-                </button>
-              </div>
-            )}
           </div>
           {loaded && !currentEvent && <p className="muted">Inga kommande event.</p>}
           {currentEvent && <p className="ev-meta">
             {attendees.filter(person => person.type === 'member' || person.status === 'active').length} aktiva deltagare · {breakdown[currentEvent.id]?.members || 0} medlemmar, {breakdown[currentEvent.id]?.guests || 0} gäster
           </p>}
+          {currentEvent && (
+            <div className="signup-download-actions" aria-label="Ladda ner listor">
+              <button className="download-signups download-signups--primary" type="button" onClick={downloadMeetingList} disabled={downloadingWorkbook}>
+                {downloadingWorkbook ? 'Skapar möteslista...' : 'Ladda ner möteslista (Excel)'}
+              </button>
+              <button className="download-signups" type="button" onClick={downloadSignupList}>
+                Ladda ner deltagarlista (CSV)
+              </button>
+              <button className="download-signups" type="button" onClick={printSignupList}>
+                Skriv ut deltagarlista / spara PDF
+              </button>
+            </div>
+          )}
           {currentEvent && attendees.length === 0 && <p className="muted">Inga anmälda än.</p>}
           {attendees.length > 0 && (
             <>

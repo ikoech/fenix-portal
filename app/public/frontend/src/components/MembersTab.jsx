@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchMembers } from '../api/members'
+import { downloadMemberCatalogCSV } from '../api/directory'
 import '../css/MembersTab.css'
 
 function MemberPhoto({ member, className = '' }) {
@@ -83,6 +84,7 @@ function MembersTab() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [downloadError, setDownloadError] = useState('')
   const [selectedMember, setSelectedMember] = useState(null)
 
   useEffect(() => {
@@ -146,6 +148,21 @@ function MembersTab() {
     return searchTerms.every(term => searchableText.includes(term))
   })
 
+  const handleDownload = () => {
+    setDownloadError('')
+    try {
+      downloadMemberCatalogCSV(filtered.map(member => ({
+        name: member.name,
+        company: member.acf?.company,
+        expertise: member.acf?.expertise,
+        deputy: member.acf?.deputy,
+        specific_search: member.acf?.specific_search,
+      })))
+    } catch (error) {
+      setDownloadError(`Medlemskatalogen kunde inte laddas ner: ${error.message}`)
+    }
+  }
+
   if (selectedMember) {
     return (
       <MemberDetails
@@ -162,7 +179,22 @@ function MembersTab() {
         Kom i kontakt med vårt nätverk av yrkesverksamma
       </p>
 
+      <div className="members-catalog-actions no-print">
+        <div>
+          <strong>Medlemskatalog</strong>
+          <span>Ladda ner eller skriv ut den aktuella listan.</span>
+        </div>
+        <div className="members-catalog-buttons">
+          <button type="button" disabled={loading || !!error} onClick={() => window.print()}>
+            Skriv ut / spara som PDF
+          </button>
+          <button type="button" disabled={loading || !!error || filtered.length === 0} onClick={handleDownload}>
+            Ladda ner medlemskatalog (CSV)
+          </button>
+        </div>
+      </div>
       {error && <p className="error-msg">{error}</p>}
+      {downloadError && <p className="error-msg no-print" role="alert">{downloadError}</p>}
 
       <div className="members-search">
         <input
@@ -211,6 +243,36 @@ function MembersTab() {
             ))}
           </div>
         )
+      )}
+      {!loading && !error && (
+        <div className="members-print-catalog print-only">
+          <h1>Medlemskatalog</h1>
+          <p>{filtered.length} medlemmar</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Nr</th>
+                <th>Namn</th>
+                <th>Företag</th>
+                <th>Är bra på</th>
+                <th>Ersättare</th>
+                <th>Specifika sök</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((member, index) => (
+                <tr key={member.id}>
+                  <td>{index + 1}</td>
+                  <th>{member.name || '—'}</th>
+                  <td>{member.acf?.company || '—'}</td>
+                  <td>{member.acf?.expertise || '—'}</td>
+                  <td>{member.acf?.deputy || '—'}</td>
+                  <td>{member.acf?.specific_search || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   )
